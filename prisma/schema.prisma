@@ -18,7 +18,96 @@ datasource db {
 // Learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 model User {
-  id        Int               @id @default(autoincrement())
-  name      String
-  email     String            @unique
+  id               Int               @id @default(autoincrement())
+  firstName        String
+  lastName         String
+  introduction     String?
+  email            String            @unique
+  password         String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  contract         Contract?
+  profile          Profile?
+  certifications   Certification[]
+  badges           Badge[]
+}
+
+model Contract {
+  id          Int       @id @default(autoincrement())
+  logoUrl     String
+  name        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      Int       @unique
+
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model Profile {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      Int       @unique
+
+  user        User      @relation(fields: [userId], references: [id])
+  image       Image?
+}
+
+model Certification {
+  id          Int       @id @default(autoincrement())
+  name        String
+  authority   String
+  licenseNo   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      Int
+
+  user        User      @relation(fields: [userId], references: [id])
+  image       Image?
+}
+
+model Badge {
+  id          Int       @id @default(autoincrement())
+  name        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      Int
+
+  user        User      @relation(fields: [userId], references: [id])
+  image       Image?
+}
+
+model Project {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  images      Image[]
+}
+
+model Image {
+  id              Int       @id @default(autoincrement())
+  url             String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  projectId       Int?
+  badgeId         Int?      @unique
+  certificationId Int?      @unique
+  profileId       Int?      @unique
+
+  project         Project?        @relation(fields: [projectId], references: [id])
+  badge           Badge?          @relation(fields: [badgeId], references: [id])
+  certification   Certification?  @relation(fields: [certificationId], references: [id])
+  profile         Profile?        @relation(fields: [profileId], references: [id])
+}
+
+model VerificationToken {
+  identifier  String
+  token       String     @unique
+  expires     DateTime
+
+  @@unique([identifier, token])
 }
