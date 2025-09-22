@@ -1,11 +1,25 @@
 import express from 'express';
+import useRoutes from './routes/userRoutes';
 import dotenv from 'dotenv';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 
 const app = express();
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: 'Too many requests from this IP, please try again after 15 minutes'
+})
+
+app.use(helmet());
+app.use(limiter);
+app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+app.use('/api/users', useRoutes);
 
+const PORT = process.env.PORT;
+app.listen(PORT, () => { console.log(`Server is running on port ${PORT}`)});
