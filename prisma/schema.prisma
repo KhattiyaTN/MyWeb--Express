@@ -27,27 +27,28 @@ model User {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
-  contract         Contract?
+  contracts        Contract[]
   profile          Profile?
   certifications   Certification[]
   badges           Badge[]
+  projects         Project[]
 }
 
 model Contract {
   id          Int       @id @default(autoincrement())
-  logoUrl     String
   name        String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      Int       @unique
 
   user        User      @relation(fields: [userId], references: [id])
+  image       Image?
 }
 
 model Profile {
   id          Int       @id @default(autoincrement())
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  updatedAt   DateTime  @updatedAt 
   userId      Int       @unique
 
   user        User      @relation(fields: [userId], references: [id])
@@ -84,7 +85,9 @@ model Project {
   description String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  userId      Int
 
+  user        User      @relation(fields: [userId], references: [id])
   images      Image[]
 }
 
@@ -97,11 +100,13 @@ model Image {
   badgeId         Int?      @unique
   certificationId Int?      @unique
   profileId       Int?      @unique
+  contractId      Int?      @unique
 
   project         Project?        @relation(fields: [projectId], references: [id])
   badge           Badge?          @relation(fields: [badgeId], references: [id])
   certification   Certification?  @relation(fields: [certificationId], references: [id])
   profile         Profile?        @relation(fields: [profileId], references: [id])
+  contract        Contract?       @relation(fields: [contractId], references: [id])
 }
 
 model VerificationToken {
