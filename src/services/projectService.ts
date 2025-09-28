@@ -1,5 +1,4 @@
-import { getAllProject } from './../controllers/projectController';
-import { PrismaClient } from '../generated/prisma';
+import { PrismaClient } from '@prisma/client';
 import type { Project } from '../types/types';
 
 const prisma = new PrismaClient();
