@@ -6,3 +6,13 @@ export interface User {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface Certificate {
+    name: String
+    authority: String
+    licenseNo: String
+    createdAt: Date;
+    updatedAt: Date;
+    // Foreign key to User
+    user: number;
+}

@@ -1,5 +1,6 @@
 import express from 'express';
-import useRoutes from './routes/userRoutes';
+import userRoutes from './routes/userRoutes';
+import certRoutes from './routes/certRoutes';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -19,7 +20,8 @@ app.use(limiter);
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
-app.use('/api/users', useRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/certs', certRoutes);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => { console.log(`Server is running on port ${PORT}`)});
