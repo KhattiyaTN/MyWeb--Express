@@ -19,9 +19,18 @@ const limiter = rateLimit({
     message: 'Too many requests from this IP, please try again after 15 minutes'
 })
 
-app.use(helmet());
 app.use(limiter);
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
+app.use(helmet());
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: ["'self'"],
+            imgSrc: ["'self'", ...(process.env.CLOUD_STORAGE_URL ? [process.env.CLOUD_STORAGE_URL] : [])],
+            scriptSrc: ["'self'"],
+        },
+    })
+);
 app.use(express.json());
 
 app.use('/api/users', userRoutes);
