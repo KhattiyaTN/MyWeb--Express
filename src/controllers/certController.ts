@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { getAllCertService, addCertService, updateCertService, deleteCertService } from "../services/certService";
 
 // GET all certs
-export const getCert = async (req: Request, res: Response) => {
+export const getCerts = async (req: Request, res: Response) => {
     const certs = await getAllCertService();
 
     res.status(200).json(certs);

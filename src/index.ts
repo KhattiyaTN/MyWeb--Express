@@ -1,8 +1,12 @@
 import express from 'express';
 import userRoutes from './routes/userRoutes';
 import certRoutes from './routes/certRoutes';
-import dotenv from 'dotenv';
+import badgeRoutes from './routes/badgeRoutes';
+import profileRoutes from './routes/profileRoutes';
+import projectRoutes from './routes/projectRoutes';
+import contractRoutes from './routes/contactRoutes';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
@@ -22,6 +26,10 @@ app.use(express.json());
 
 app.use('/api/users', userRoutes);
 app.use('/api/certs', certRoutes);
+app.use('/api/badges', badgeRoutes);
+app.use('/api/profiles', profileRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/contracts', contractRoutes);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => { console.log(`Server is running on port ${PORT}`)});
