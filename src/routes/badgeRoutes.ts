@@ -5,8 +5,8 @@ import { getBadges, createBadge, updateBadge, deleteBadge } from '../controllers
 const router = Router();
 
 router.get('/:id', getBadges);
-router.post('/', upload.array('images', 10), createBadge);
-router.put('/:id', upload.array('images', 10), updateBadge);
+router.post('/', upload.array('images', 1), createBadge);
+router.put('/:id', upload.array('images', 1), updateBadge);
 router.delete('/:id', deleteBadge);
 
 export default router;
