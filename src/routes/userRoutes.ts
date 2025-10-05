@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { getUsers, createUser, updateUser } from '../controllers/userController.ts';
+import { upload } from '../middleware/uploadMiddleware';
+import { getUser, createUser, updateUser } from '../controllers/userController.ts';
 
 const router = Router();
 
-router.get('/', getUsers);
-router.post('/', createUser);
-router.patch('/:id', updateUser);
+router.get('/:id', getUser);
+router.post('/', upload.array('images', 1), createUser);
+router.patch('/:id', upload.array('images', 1), updateUser);
 
 export default router;
