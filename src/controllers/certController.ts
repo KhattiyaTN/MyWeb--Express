@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { getAllCertService, addCertService, updateCertService, deleteCertService } from "../services/certService";
 
-// GET all certs
+// GET
 export const getCerts = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const certs = await getAllCertService();
@@ -11,7 +11,7 @@ export const getCerts = async (req: Request, res: Response, next: NextFunction) 
     }
 };
 
-// POST create a new certificate
+// POST
 export const createCert = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const certData = req.body;
@@ -22,7 +22,7 @@ export const createCert = async (req: Request, res: Response, next: NextFunction
     }
 }
 
-// PATCH update a certificate
+// PATCH
 export const updateCert = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
@@ -41,7 +41,7 @@ export const updateCert = async (req: Request, res: Response, next: NextFunction
     }
 }
 
-// DELETE a certificate
+// DELETE
 export const deleteCert = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;

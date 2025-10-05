@@ -3,9 +3,12 @@ import type { User } from "../types/types"
 
 const prisma = new PrismaClient();
 
-// GET users service
-export const getAllUsersService = async () => {
-    return await prisma.user.findMany();
+// GET user service
+export const getUsersService = async (userId: number) => {
+    return await prisma.user.findFirst({
+        where: { id: userId },
+        // include: Image,
+    });
 }
 
 // POST user service

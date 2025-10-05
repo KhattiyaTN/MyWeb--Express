@@ -1,10 +1,17 @@
 import type { Request, Response, NextFunction } from "express";
-import { getAllUsersService, addUserService, updateUserService } from "../services/userService";
+import { getUsersService, addUserService, updateUserService } from "../services/userService";
 
 // GET
-export const getUsers =  async (req: Request, res: Response, next: NextFunction) => {
+export const getUser =  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const users = await getAllUsersService();
+        const { id } = req.params;
+        const userId = Number(id);
+
+        if (isNaN(userId)) {
+            return res.status(400).json({ message: 'Invelid user ID' });
+        }
+
+        const users = await getUsersService(userId);
         res.status(200).json(users);
     } catch (error) {
         next(error);
