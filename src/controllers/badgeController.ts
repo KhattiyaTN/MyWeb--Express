@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { uploadFileToS3 } from '../services/aws/uploadService';
 import { getAllBadgesService, createBadgeService, updateBadgeService, deleteBadgeService } from '../services/badgeService';
 
 // GET
@@ -23,12 +24,24 @@ export const getBadges = async (req: Request, res: Response, next: NextFunction)
 export const createBadge = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const badgeData = req.body;
-        const newBadge = await createBadgeService(badgeData);
+        const badgeFiles = req.files as Express.Multer.File[] || [];
+
+        let imageUrls: string[] = [];
+
+        if (badgeFiles.length > 0) {
+            imageUrls = await Promise.all(badgeFiles.map(file => uploadFileToS3(file)));
+        } else if (typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '') {
+            imageUrls = [req.body.imageUrl.trim()];
+        } else {
+            return res.status(400).json({ message: 'Image file or imageUrl is required' });
+        }
+
+        const newBadge = await createBadgeService(badgeData, imageUrls);
         res.status(201).json(newBadge);
     } catch (error) {
         next(error);
     }
-}
+};
 
 // PATCH
 export const updateBadge = async (req: Request, res: Response, next: NextFunction) => {

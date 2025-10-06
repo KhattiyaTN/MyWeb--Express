@@ -11,9 +11,25 @@ export const getAllBadgesService = async (userId: number) => {
 }
 
 // POST create a new badge
-export const createBadgeService = async (badgeData: Badge) => {
-    // Business logic about keeping badge data to badge table and image path of aws s3 to image table
-}
+export const createBadgeService = async (badgeData: Badge, imageUrls: string[]) => {
+    return await prisma.badge.create({
+        data: {
+            name: badgeData.name,
+            userId: badgeData.userId,
+            image: imageUrls[0]
+                ? { create: 
+                    { 
+                        url: imageUrls[0],
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    }
+                } : undefined,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        },
+        include: { image: true },
+    });
+};
 
 // PATCH update a badge by ID
 export const updateBadgeService = async (badgeId: number, data: Partial<Badge>) => {

@@ -8,15 +8,8 @@ export interface User {
 }
 
 export interface Contract {
-    logoUrl: String;
-    name: String;
-    createdAt: Date;
-    updatedAt: Date;
-    // Foreign key to User
-    userId: number;
-}
-
-export interface Profile {
+    logoUrl: string;
+    name: string;
     createdAt: Date;
     updatedAt: Date;
     // Foreign key to User
@@ -24,17 +17,17 @@ export interface Profile {
 }
 
 export interface Certificate {
-    name: String;
-    authority: String;
-    licenseNo: String;
+    name: string;
+    authority: string;
+    licenseNo: string;
     createdAt: Date;
     updatedAt: Date;
     // Foreign key to User
-    user: number;
+    userId: number;
 }
 
 export interface Badge {
-    name: String;
+    name: string;
     createdAt: Date;
     updatedAt: Date;
     // Foreign key to User
@@ -42,10 +35,23 @@ export interface Badge {
 }
 
 export interface Project {
-    name: String;
-    description: String;
+    name: string;
+    description: string;
     createdAt: Date;
     updatedAt: Date;
     // Foreign key to User
     userId: number;
+}
+
+export interface Image {
+    url: string;
+    createdAt: Date;
+    updatedAt: Date;
+    // Foreign keys
+    badgeId?: number;
+    certificationId?: number;
+    contractId?: number;
+    profileId?: number;
+    projectId?: number;
+    userId?: number;
 }
