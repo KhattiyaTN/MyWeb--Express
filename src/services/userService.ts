@@ -7,17 +7,33 @@ const prisma = new PrismaClient();
 export const getUsersService = async (userId: number) => {
     return await prisma.user.findFirst({
         where: { id: userId },
-        // include: Image,
+        include: { 
+            image: true 
+        }
     });
 }
 
 // POST user service
-export const addUserService = async (user: User) => {
+export const addUserService = async (userData: User, imageUrls: string[]) => {
     return await prisma.user.create({ 
         data: {
-            ...user,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            introduction: userData.introduction,
+            email: userData.email,
+            password: "hashed",
+            image: imageUrls[0]
+                ? { create: 
+                    { 
+                        url: imageUrls[0],
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    }
+                } : undefined,
             createdAt: new Date(),
-        } 
+            updatedAt: new Date(),
+        },
+        include: { image: true } 
     });
 }
 
