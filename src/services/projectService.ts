@@ -1,5 +1,6 @@
 import { prisma } from '../config/prismaClient';
 import type { Project } from '../types/types';
+import { deleteFileFromS3 } from './aws/deleteImageService';
 import { uploadFileToS3 } from './aws/images/uploadImageService';
 
 // GET All project by ID
@@ -74,8 +75,20 @@ export const updateProjectService = async (id: number, data: Partial<Project>, i
 }
 
 // DELETE project
-export const deleteProjectService = async (id: number) => {
+export const deleteProjectService = async (projectId: number) => {
+    const existingProject = await prisma.project.findUnique({
+        where: { id: projectId },
+        include: { images: true }
+    });
+
+    if (!existingProject) {
+        throw new Error('Project not found');
+    }
+
+    await Promise.all(existingProject.images.map(image => deleteFileFromS3(image.url)));
+
     return await prisma.project.delete({
-        where: { id }
-    })
+        where: { id: projectId },
+        include: { images: true }
+    });
 }
