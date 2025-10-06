@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from "express";
-import { uploadFileToS3 } from "../../services/aws/uploadService";
 import { getUsersService, addUserService, updateUserService } from "../../services/auth/authService";
 
 // GET
@@ -23,19 +22,8 @@ export const getUser =  async (req: Request, res: Response, next: NextFunction) 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userData = req.body;
-        const userFiles = req.files as Express.Multer.File[] || [];
 
-        let imageUrls: string[] = [];
-
-        if (userFiles.length > 0) {
-            imageUrls = await Promise.all(userFiles.map(file => uploadFileToS3(file)));
-        } else if (typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '') {
-            imageUrls = [req.body.imageUrl];
-        } else {
-            return res.status(400).json({ message: 'Image file or imageUrl is required' });
-        }
-
-        const newUser = await addUserService( userData, imageUrls );
+        const newUser = await addUserService( userData );
         res.status(201).json(newUser);
     } catch (error) {
         next(error);

@@ -8,12 +8,11 @@ const prisma = new PrismaClient();
 export const getUsersService = async (userId: number) => {
     return await prisma.user.findFirst({
         where: { id: userId },
-        include: { image: true }
     });
 }
 
 // POST user service
-export const addUserService = async (userData: User, imageUrls: string[]) => {
+export const addUserService = async (userData: User) => {
 
     const hashedPassword = await hashPassword(userData.password);
 
@@ -24,18 +23,9 @@ export const addUserService = async (userData: User, imageUrls: string[]) => {
             introduction: userData.introduction,
             email: userData.email,
             password: hashedPassword,
-            image: imageUrls[0]
-                ? { create: 
-                    { 
-                        url: imageUrls[0],
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                    }
-                } : undefined,
             createdAt: new Date(),
             updatedAt: new Date(),
-        },
-        include: { image: true } 
+        }
     });
 }
 
