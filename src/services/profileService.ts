@@ -71,8 +71,22 @@ export const updateProfileService = async (userId: number, data: Partial<Profile
 };
 
 // DELETE profile by ID
-export const deleteProfileService = async (id: number): Promise<void> => {  
-    await prisma.profile.delete({
-        where: { id },
+export const deleteProfileService = async (profileId: number) => {  
+    const existingProfile = await prisma.profile.findUnique({
+        where: { id: profileId },
+        include: { image: true },
+    });
+
+    if (!existingProfile) {
+        throw new Error('Profile not found');
+    }
+
+    if (existingProfile?.image?.url) {
+        await deleteFileFromS3(existingProfile.image.url);
+    }
+
+    return await prisma.profile.delete({
+        where: { id: profileId },
+        include: { image: true },
     });
 };
