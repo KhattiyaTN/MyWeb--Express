@@ -6,7 +6,9 @@ const prisma = new PrismaClient();
 // GET badges by user ID
 export const getAllBadgesService = async (userId: number) => {
     return await prisma.badge.findMany({
-        where: { userId }
+        where: { userId },
+        include: { image: true },
+        orderBy: { createdAt: 'desc' }
     })
 }
 

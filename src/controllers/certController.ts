@@ -1,11 +1,18 @@
 import type { Request, Response, NextFunction } from "express";
 import { uploadFileToS3 } from "../services/aws/uploadService";
-import { getAllCertService, addCertService, updateCertService, deleteCertService } from "../services/certService";
+import { getCertService, addCertService, updateCertService, deleteCertService } from "../services/certService";
 
 // GET
 export const getCerts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const certs = await getAllCertService();
+        const { id } = req.params;
+        const userId = Number(id);
+
+        if (isNaN(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID' });
+        }
+
+        const certs = await getCertService(userId);
         res.status(200).json(certs);
     } catch (error) {
         next(error);

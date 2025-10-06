@@ -7,9 +7,7 @@ const prisma = new PrismaClient();
 export const getUsersService = async (userId: number) => {
     return await prisma.user.findFirst({
         where: { id: userId },
-        include: { 
-            image: true 
-        }
+        include: { image: true }
     });
 }
 

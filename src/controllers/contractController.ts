@@ -5,7 +5,14 @@ import { getContractService, createContractService, updateContractService, delet
 // GET
 export const getContract = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const contract = await getContractService();
+        const { id } = req.params;
+        const userId = Number(id);
+
+        if (isNaN(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID' });
+        }
+
+        const contract = await getContractService(userId);
         res.status(200).json(contract);
     } catch (error) {
         next(error);

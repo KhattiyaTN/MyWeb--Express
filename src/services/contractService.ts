@@ -4,8 +4,12 @@ import type { Contract } from '../types/types'
 const prisma = new PrismaClient();
 
 // GET contract service
-export const getContractService = async () => {
-    return await prisma.contract.findMany();
+export const getContractService = async (userId: number) => {
+    return await prisma.contract.findMany({
+        where: { userId: userId },
+        include: { image: true },
+        orderBy: { createdAt: 'desc' }
+    });
 }
 
 // POST create contract service

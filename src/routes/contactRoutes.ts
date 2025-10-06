@@ -4,7 +4,7 @@ import { getContract, createContract, updateContract, deleteContract } from '../
 
 const router = Router();
 
-router.get('/', getContract);
+router.get('/:id', getContract);
 router.post('/', upload.array('images', 1), createContract);
 router.patch('/:id', upload.array('images', 1), updateContract);
 router.delete('/:id', deleteContract);

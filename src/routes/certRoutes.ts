@@ -4,7 +4,7 @@ import { getCerts, createCert, updateCert, deleteCert } from '../controllers/cer
 
 const router = Router();
 
-router.get('/', getCerts);
+router.get('/:id', getCerts);
 router.post('/', upload.array('images', 1), createCert);
 router.patch('/:id', upload.array('images', 1), updateCert);
 router.delete('/:id', deleteCert);

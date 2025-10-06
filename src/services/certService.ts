@@ -4,8 +4,12 @@ import type { Certificate } from "../types/types"
 const prisma = new PrismaClient();
 
 // GET certs service
-export const getAllCertService = async () => {
-    return await prisma.certification.findMany();
+export const getCertService = async (userId: number) => {
+    return await prisma.certification.findMany({
+        where: { userId: userId },
+        include: { image: true },
+        orderBy: { createdAt: 'desc' }
+    });
 }
 
 // POST add cert service

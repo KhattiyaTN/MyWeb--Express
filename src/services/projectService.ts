@@ -3,10 +3,12 @@ import type { Project } from '../types/types';
 
 const prisma = new PrismaClient();
 
-// GET all project by ID
-export const getAllProjectService = async (id: number) => {
+// GET All project by ID
+export const getProjectsService = async (userId: number) => {
     const projects = await prisma.project.findMany({
-        where: { userId: id }
+        where: { userId: userId },
+        include: { images: true },
+        orderBy: { createdAt: 'desc' },
     })
 }
 

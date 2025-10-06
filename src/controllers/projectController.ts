@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction } from 'express'
 import { uploadFileToS3 } from '../services/aws/uploadService';
-import { getAllProjectService, createProjectService, updateProjectService, deleteProjectService } from '../services/projectService';
+import { getProjectsService, createProjectService, updateProjectService, deleteProjectService } from '../services/projectService';
 
 // GET
-export const getAllProject = async (req: Request, res: Response, next: NextFunction) => {
+export const getProjects = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params
         const userId = Number(id);
@@ -12,7 +12,7 @@ export const getAllProject = async (req: Request, res: Response, next: NextFunct
             return res.status(400).json({ message: "Invalid user ID"})
         }
 
-        const projects = await getAllProjectService(userId);
+        const projects = await getProjectsService(userId);
         res.status(200).json(projects);
     } catch (error) {
         next(error);
