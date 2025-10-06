@@ -1,40 +1,37 @@
-import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import morgan = require('morgan');
+import { limiter } from './config/rateLimit';
+import { errorHandler } from './config/errorHandler';
+import { helmetMiddlewares } from './config/helmetOption';
+
 import userRoutes from './routes/auth/authRoutes';
 import certRoutes from './routes/certRoutes';
 import badgeRoutes from './routes/badgeRoutes';
 import profileRoutes from './routes/profileRoutes';
 import projectRoutes from './routes/projectRoutes';
 import contractRoutes from './routes/contactRoutes';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 
-// Initialize Express app
 const app = express();
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: 'Too many requests from this IP, please try again after 15 minutes'
-})
 
+// Logging
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// Rate limiting
 app.use(limiter);
+
+// CORS
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
-app.use(helmet({
-    hsts: { maxAge: 31536000, includeSubDomains: true },
-    referrerPolicy: { policy: 'no-referrer' },
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            imgSrc: ["'self'", process.env.CLOUD_STORAGE_URL ?? ""].filter(Boolean),
-            scriptSrc: ["'self'"],
-        },
-    },
-}));
-app.use(express.json());
+
+// Body parsing
+app.use(express.json({ limit: '10mb' })); 
+
+// Security headers
+helmetMiddlewares.forEach(mw => app.use(mw));
 
 // Routes
 app.use('/api/users', userRoutes);
@@ -44,20 +41,16 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/contracts', contractRoutes);
 
-// Error handling middleware
+// 404 handler
 app.use((req: Request, res: Response) => {
     res.status(404).json({ message: 'Route not found' });
 });
-app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-    console.error(err);
-    if (err instanceof Error) {
-        res.status(500).json({ message: err.message });
-    } else {
-        res.status(500).json({ message: 'Internal Server Error' });
-    }
-});
 
+// Centralized error handler
+app.use(errorHandler);
 
-// Start the server
+// Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => { console.log(`Server is running on port ${PORT}`)});
+app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});
