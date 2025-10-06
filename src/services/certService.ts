@@ -76,8 +76,22 @@ export const updateCertService = async (id: number, data: Partial<Certificate>, 
 }
 
 // DELETE cert service
-export const deleteCertService = async (id: number) => {
-    return await prisma.certification.delete({
-        where: { id: id }
+export const deleteCertService = async (certId: number) => {
+    const existingCert = await prisma.certification.findUnique({
+        where: { id: certId },
+        include: { image: true },
     })
+
+    if (!existingCert) {
+        throw new Error('Certificate not found');
+    }
+
+    if (existingCert?.image?.url) {
+        await deleteFileFromS3(existingCert.image.url);
+    }
+
+    return await prisma.certification.delete({
+        where: { id: certId },
+        include: { image: true },
+    });
 }
