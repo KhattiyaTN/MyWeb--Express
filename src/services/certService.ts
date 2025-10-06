@@ -9,17 +9,27 @@ export const getAllCertService = async () => {
 }
 
 // POST add cert service
-export const addCertService = async (cert: Certificate & { userId: number }) => {
-    return await prisma.certification.create({ 
-        data: { 
-            name: cert.name.toString(),
-            authority: cert.authority.toString(),
-            licenseNo: cert.licenseNo.toString(),
+export const addCertService = async (certData: Certificate, imageUrls: string[]) => {
+    return await prisma.certification.create({
+        data: {
+            name: certData.name,
+            authority: certData.authority,
+            licenseNo: certData.licenseNo,
+            userId: certData.userId,
+            image: imageUrls[0]
+                ? { create: 
+                    { 
+                        url: imageUrls[0],
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    }
+                } : undefined,
             createdAt: new Date(),
-            user: { connect: { id: cert.userId } }
-        }
-    })
-}
+            updatedAt: new Date(),
+        },
+        include: { image: true },
+    });
+};
 
 // PATCH update cert service
 export const updateCertService = async (id: number, data: Partial<Certificate>) => {

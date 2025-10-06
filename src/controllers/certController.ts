@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { uploadFileToS3 } from "../services/aws/uploadService";
 import { getAllCertService, addCertService, updateCertService, deleteCertService } from "../services/certService";
 
 // GET
@@ -15,7 +16,19 @@ export const getCerts = async (req: Request, res: Response, next: NextFunction) 
 export const createCert = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const certData = req.body;
-        const newCert = await addCertService(certData);
+        const certFiles = req.files as Express.Multer.File[] || [];
+
+        let imageUrls: string[] = [];
+
+        if (certFiles.length > 0) {
+            imageUrls = await Promise.all(certFiles.map(file => uploadFileToS3(file)));
+        } else if (typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '') {
+            imageUrls = [req.body.imageUrl.trim()];
+        } else {
+            return res.status(400).json({ message: 'Image file or imageUrl is required' });
+        }
+
+        const newCert = await addCertService(certData, imageUrls);
         res.status(201).json(newCert);
     } catch (error) {
         next(error);
