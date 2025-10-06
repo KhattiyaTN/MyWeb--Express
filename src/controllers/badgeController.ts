@@ -26,8 +26,8 @@ export const createBadge = async (req: Request, res: Response, next: NextFunctio
         const badgeData = req.body;
         const badgeFiles = req.files as Express.Multer.File[] || [];
 
-        if (!badgeFiles.length && !(typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '')) {
-            return res.status(400).json({ message: 'Image file or imageUrl is required' });
+        if (!badgeFiles.length) {
+            return res.status(400).json({ message: 'Image file is required' });
         }
 
         const newBadge = await createBadgeService(badgeData, badgeFiles);

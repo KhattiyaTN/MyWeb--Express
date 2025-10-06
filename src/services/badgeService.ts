@@ -13,14 +13,12 @@ export const getAllBadgesService = async (userId: number) => {
 }
 
 // POST create a new badge
-export const createBadgeService = async (badgeData: Badge, files: Express.Multer.File[], imageUrl?: string) => {
+export const createBadgeService = async (badgeData: Badge, files: Express.Multer.File[]) => {
     let finalImageUrl = '';
 
     if (files.length > 0) {
         const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
         finalImageUrl = uploadResults[0] ?? '';
-    } else if (imageUrl?.trim()) {
-        finalImageUrl = imageUrl.trim();
     }
 
     return await prisma.badge.create({
