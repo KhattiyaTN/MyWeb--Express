@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { uploadFileToS3 } from '../services/aws/uploadService';
+import { uploadFileToS3 } from '../services/aws/images/uploadImageService';
 import { getProfileService, createProfileService, updateProfileService, deleteProfileService } from '../services/profileService';
 
 // GET
@@ -46,15 +46,30 @@ export const createProfile = async (req: Request, res: Response, next: NextFunct
 export const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const data = req.body;
         const profileId = Number(id);
+        const data = req.body;
+        const profileFiles = [];
+
+        let imageUrl: string = '';
     
         if (isNaN(profileId)) {
             return res.status(400).json({ message: 'Invalid profile ID' });
         }
+
+        if (req.files) {
+            profileFiles.push(...(req.files as Express.Multer.File[]));
     
-        const updateProfile = await updateProfileService(profileId, data);
+            if (profileFiles.length > 0) {
+                const imageUrls = await Promise.all(profileFiles.map(file => uploadFileToS3(file)));
     
+                if (imageUrls[0]) {
+                    imageUrl = imageUrls[0];
+                }
+            }
+        }
+
+        const updateProfile = await updateProfileService(profileId, data, imageUrl);
+
         res.status(200).json(updateProfile);
     } catch (error) {
         next(error);
