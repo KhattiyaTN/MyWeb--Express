@@ -7,7 +7,7 @@ import { limiter } from './config/rateLimit';
 import { errorHandler } from './config/errorHandler';
 import { helmetMiddlewares } from './config/helmetOption';
 
-import userRoutes from './routes/auth/authRoutes';
+import authRoutes from './routes/auth/authRoutes';
 import certRoutes from './routes/certRoutes';
 import badgeRoutes from './routes/badgeRoutes';
 import profileRoutes from './routes/profileRoutes';
@@ -27,14 +27,11 @@ app.use(limiter);
 // CORS
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 
-// Body parsing
-app.use(express.json({ limit: '10mb' })); 
-
 // Security headers
 helmetMiddlewares.forEach(mw => app.use(mw));
 
 // Routes
-app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/certs', certRoutes);
 app.use('/api/badges', badgeRoutes);
 app.use('/api/profile', profileRoutes);

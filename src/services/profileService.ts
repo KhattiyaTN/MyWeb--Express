@@ -16,8 +16,8 @@ export const createProfileService = async (profileData: Profile, imageUrls: stri
         data: { 
             bio: profileData.bio,
             userId: profileData.userId,
-            image: imageUrls[0] ?
-                { create: 
+            image: imageUrls[0] 
+                ? { create:
                     {
                         url: imageUrls[0],
                         createdAt: new Date(),
