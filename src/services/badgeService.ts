@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import type { Badge } from '../types/types';
+import { deleteFileFromS3 } from './aws/deleteService';
 
 const prisma = new PrismaClient();
 
@@ -34,14 +35,37 @@ export const createBadgeService = async (badgeData: Badge, imageUrls: string[]) 
 };
 
 // PATCH update a badge by ID
-export const updateBadgeService = async (badgeId: number, data: Partial<Badge>) => {
+export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, imageUrl: string) => {
+    const existingBadge = await prisma.badge.findUnique({
+        where: { id: badgeId },
+        include: { image: true },
+    });
+
+    if (imageUrl && existingBadge?.image?.url && existingBadge.image.url !== imageUrl) {
+        await deleteFileFromS3(existingBadge.image.url);
+    }
+
     return await prisma.badge.update({
         where: { id: badgeId },
         data: {
             name: data.name?.toString(),
-            createdAt: new Date(),
+            image: imageUrl ? 
+                { 
+                    upsert: {
+                        create: {
+                            url: imageUrl,
+                            createdAt: new Date(),
+                            updatedAt: new Date(),
+                        },
+                        update: {
+                            url: imageUrl,
+                            updatedAt: new Date(),
+                        }
+                    }
+                } : undefined,
             updatedAt: new Date(),
-        }
+        },
+        include: { image: true },
     })
 }
 

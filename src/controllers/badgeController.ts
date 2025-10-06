@@ -47,14 +47,26 @@ export const createBadge = async (req: Request, res: Response, next: NextFunctio
 export const updateBadge = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const data = req.body;
         const badgeId = Number(id);
+        const data = req.body;
+        const badgeFiles = [];
+
+        let imageUrl: string = '';
+
+        if (req.files) {
+            badgeFiles.push(...(req.files as Express.Multer.File[]));
+
+            if (badgeFiles.length > 0) {
+                const imageUrls = await Promise.all(badgeFiles.map(file => uploadFileToS3(file)));
+                const imageUrl = imageUrls[0];
+            }
+        }
     
         if (isNaN(badgeId)) {
             return res.status(400).json({ message: 'Invalid badge ID' });
         }
     
-        const updateBadge = await updateBadgeService(badgeId, data);
+        const updateBadge = await updateBadgeService(badgeId, data, imageUrl);
     
         res.status(200).json(updateBadge);
     } catch (error) {
