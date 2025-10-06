@@ -45,7 +45,7 @@ export const addCertService = async (certData: Certificate, files: Express.Multe
 };
 
 // PATCH update cert service
-export const updateCertService = async (id: number, data: Partial<Certificate>, imageUrl: string) => {
+export const updateCertService = async (id: number, data: Partial<Certificate>, files: Express.Multer.File[], imageUrl?: string) => {
     const existingCert = await prisma.certification.findUnique({
         where: { id: id },
         include: { image: true },
@@ -54,8 +54,17 @@ export const updateCertService = async (id: number, data: Partial<Certificate>, 
     if (!existingCert) {
         throw new Error('Certificate not found');
     }
+
+    let finalImageUrl = '';
     
-    if (imageUrl && existingCert?.image?.url && existingCert.image.url !== imageUrl) {
+    if (files.length > 0) {
+        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
+        finalImageUrl = uploadResults[0] ?? '';
+    } else if (imageUrl?.trim()) {
+        finalImageUrl = imageUrl.trim();
+    }
+
+    if (finalImageUrl && existingCert?.image?.url && existingCert.image.url !== finalImageUrl) {
         await deleteFileFromS3(existingCert.image.url);
     }
     
@@ -65,16 +74,16 @@ export const updateCertService = async (id: number, data: Partial<Certificate>, 
             name: data.name,
             authority: data.authority,
             licenseNo: data.licenseNo,
-            image: imageUrl 
+            image: finalImageUrl
                 ? {
                     upsert: {
                         create: {
-                            url: imageUrl,
+                            url: finalImageUrl,
                             createdAt: new Date(),
                             updatedAt: new Date(),
                         },
                         update: {
-                            url: imageUrl,
+                            url: finalImageUrl,
                             updatedAt: new Date(),
                         }
                     }

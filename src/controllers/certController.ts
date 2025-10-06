@@ -43,27 +43,14 @@ export const updateCert = async (req: Request, res: Response, next: NextFunction
         const { id } = req.params;
         const certId = Number(id);
         const data = req.body;
-        const certFiles = [];
+        const certFiles = req.files as Express.Multer.File[] || [];
 
-        let imageUrl = '';
 
         if (isNaN(certId)) {
             return res.status(400).json({ message: 'Invalid certificate ID' });
         }
 
-        if (req.files) {
-            certFiles.push(...(req.files as Express.Multer.File[]));
-
-            if (certFiles.length > 0) {
-                const imageUrls = await Promise.all(certFiles.map(file => uploadFileToS3(file)));
-
-                if (imageUrls[0]) {
-                    imageUrl = imageUrls[0];
-                }
-            }
-        }
-
-        const updatedCert = await updateCertService(certId, data, imageUrl);
+        const updatedCert = await updateCertService(certId, data, certFiles);
 
         res.status(200).json(updatedCert);
     } catch (error) {
