@@ -1,5 +1,6 @@
 import { prisma } from '../config/prismaClient';
 import type { Contract } from '../types/types'
+import { deleteFileFromS3 } from './aws/deleteImageService';
 
 // GET contract service
 export const getContractService = async (userId: number) => {
@@ -32,13 +33,41 @@ export const createContractService = async (contract: Contract, imageUrls: strin
 };
 
 // PATCH update contract service
-export const updateContractService = async (id: number, data: Partial<Contract>) => {
+export const updateContractService = async (id: number, data: Partial<Contract>, imageUrl: string) => {
+    const existingContract = await prisma.contract.findUnique({ 
+        where: { id },
+        include: { image: true },
+    });
+
+    if (!existingContract) {
+        throw new Error('Contract not found');
+    }
+
+    if (imageUrl && existingContract?.image?.url && existingContract.image.url !== imageUrl) {
+        await deleteFileFromS3(existingContract.image.url);
+    }
+
     return await prisma.contract.update({
         where: { id },
         data: {
-            ...(data.name !== undefined ? { name: data.name.toString() } : {}),
+            name: data.name,
+            image: imageUrl
+                ? {
+                    upsert: {
+                        create: {
+                            url: imageUrl,
+                            createdAt: new Date(),
+                            updatedAt: new Date(),
+                        },
+                        update: {
+                            url: imageUrl,
+                            updatedAt: new Date(),
+                        }
+                    }
+                } : undefined,
             updatedAt: new Date(),
-        }
+        },
+        include: { image: true },
     })
 }
 

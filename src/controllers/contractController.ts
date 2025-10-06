@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { uploadFileToS3 } from '../services/aws/uploadService';
+import { uploadFileToS3 } from '../services/aws/images/uploadImageService';
 import { getContractService, createContractService, updateContractService, deleteContractService } from '../services/contractService';
 
 // GET
@@ -46,14 +46,29 @@ export const createContract = async (req: Request, res: Response, next: NextFunc
 export const updateContract = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const data = req.body;
         const contractId = Number(id);
+        const data = req.body;
+        const contractFiles = [];
+
+        let imageUrl: string = '';
 
         if (isNaN(contractId)) {
             return res.status(400).json({ message: 'Invalid contract ID' });
         }
 
-        const updateContract = await updateContractService(contractId, data);
+        if (req.files) {
+            contractFiles.push(...(req.files as Express.Multer.File[]));
+
+            if (contractFiles.length > 0) {
+                const imageUrls = await Promise.all(contractFiles.map(file => uploadFileToS3(file)));
+                
+                if (imageUrls[0]) {
+                    imageUrl = imageUrls[0];
+                }
+            }
+        }
+
+        const updateContract = await updateContractService(contractId, data, imageUrl);
 
         res.status(200).json(updateContract);
     } catch (error) {
