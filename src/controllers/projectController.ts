@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
-import { uploadFileToS3 } from '../services/aws/uploadService';
+import { uploadFileToS3 } from '../services/aws/images/uploadImageService';
 import { getProjectsService, createProjectService, updateProjectService, deleteProjectService } from '../services/projectService';
 
 // GET
@@ -46,6 +46,9 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
                     errors: failedUploads,
                 });
             }
+
+            imageUrls = successfulUploads;
+
         } else if (typeof req.body.imageUrl === 'string' && req.body.imageUrl) {
             imageUrls = [req.body.imageUrl];
         } else {
@@ -64,15 +67,16 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
 export const updateProject = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params
-        const data = req.body
         const projectId = Number(id);
+        const data = req.body
+        const projectFiles = req.files as Express.Multer.File[] || [];
 
         if (isNaN(projectId)) {
             return res.status(400).json({ message: "Invalid project ID" });
         }
 
-        const project = await updateProjectService(projectId, data);
-        res.status(201).json(project);
+        const project = await updateProjectService(projectId, data, projectFiles);
+        res.status(200).json(project);
     } catch (error) {
         next(error);
     }

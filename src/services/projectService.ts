@@ -1,5 +1,6 @@
 import { prisma } from '../config/prismaClient';
 import type { Project } from '../types/types';
+import { uploadFileToS3 } from './aws/images/uploadImageService';
 
 // GET All project by ID
 export const getProjectsService = async (userId: number) => {
@@ -32,15 +33,44 @@ export const createProjectService = async (projectData: Project, imageUrls: stri
 }
 
 // PATCH edit project
-export const updateProjectService = async (id: number, data: Partial<Project>) => {
-    const project = await prisma.project.update({
+export const updateProjectService = async (id: number, data: Partial<Project>, imageFiles: Express.Multer.File[]) => {
+    const existingProject = await prisma.project.findUnique({
+        where: { id: id },
+        include: { images: true },
+    });
+
+    if (!existingProject) {
+        throw new Error('Project not found');
+    }
+
+    if (imageFiles.length === 0) {
+        throw new Error('At least one image file is required');
+    }
+
+    if (imageFiles.length + existingProject.images.length > 10) {
+        throw new Error('Cannot upload more than 10 images');
+    }
+
+    const imagesToCreate = await Promise.all(
+        imageFiles.map(async (file) => ({
+            url: await uploadFileToS3(file),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        }))
+    );
+
+    return await prisma.project.update({
         where: { id: id },
         data: {
-            ...(data.name !== undefined ? { name: data.name.toString() } : {}),
-            ...(data.description !== undefined ? { description: data.description.toString() } : {}),
+            name: data.name,
+            description: data.description,
+            images: imagesToCreate && imagesToCreate.length > 0 ? {
+                create: imagesToCreate
+            } : undefined,
             updatedAt: new Date(),
-        }
-    })
+        },
+        include: { images: true }
+    });
 }
 
 // DELETE project
