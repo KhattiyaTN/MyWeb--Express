@@ -1,6 +1,7 @@
 import { prisma } from '../config/prismaClient';
 import type { Contract } from '../types/types'
 import { deleteFileFromS3 } from './aws/deleteImageService';
+import { uploadFileToS3 } from './aws/images/uploadImageService';
 
 // GET contract service
 export const getContractService = async (userId: number) => {
@@ -12,15 +13,24 @@ export const getContractService = async (userId: number) => {
 }
 
 // POST create contract service
-export const createContractService = async (contract: Contract, imageUrls: string[]) => {
+export const createContractService = async (contract: Contract,  files: Express.Multer.File[], imageUrl?: string) => {
+    let finalImageUrl = '';
+
+    if (files.length > 0) {
+        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
+        finalImageUrl = uploadResults[0] ?? '';
+    } else if (imageUrl?.trim()) {
+        finalImageUrl = imageUrl.trim();
+    }
+    
     return await prisma.contract.create({
         data: {
             name: contract.name,
             userId: contract.userId,
-            image: imageUrls[0]
+            image: finalImageUrl
                 ? { create: 
                     {
-                        url: imageUrls[0],
+                        url: finalImageUrl,
                         createdAt: new Date(),
                         updatedAt: new Date(),
                     }
@@ -33,7 +43,7 @@ export const createContractService = async (contract: Contract, imageUrls: strin
 };
 
 // PATCH update contract service
-export const updateContractService = async (id: number, data: Partial<Contract>, imageUrl: string) => {
+export const updateContractService = async (id: number, data: Partial<Contract>, files: Express.Multer.File[], imageUrl?: string) => {
     const existingContract = await prisma.contract.findUnique({ 
         where: { id },
         include: { image: true },
@@ -43,7 +53,16 @@ export const updateContractService = async (id: number, data: Partial<Contract>,
         throw new Error('Contract not found');
     }
 
-    if (imageUrl && existingContract?.image?.url && existingContract.image.url !== imageUrl) {
+    let finalImageUrl = '';
+
+    if (files.length > 0) {
+        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
+        finalImageUrl = uploadResults[0] ?? '';
+    } else if (imageUrl?.trim()) {
+        finalImageUrl = imageUrl.trim();
+    }
+
+    if (finalImageUrl && existingContract?.image?.url && existingContract.image.url !== finalImageUrl) {
         await deleteFileFromS3(existingContract.image.url);
     }
 
@@ -51,16 +70,16 @@ export const updateContractService = async (id: number, data: Partial<Contract>,
         where: { id },
         data: {
             name: data.name,
-            image: imageUrl
+            image: finalImageUrl
                 ? {
                     upsert: {
                         create: {
-                            url: imageUrl,
+                            url: finalImageUrl,
                             createdAt: new Date(),
                             updatedAt: new Date(),
                         },
                         update: {
-                            url: imageUrl,
+                            url: finalImageUrl,
                             updatedAt: new Date(),
                         }
                     }

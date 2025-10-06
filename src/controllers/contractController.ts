@@ -23,19 +23,13 @@ export const getContract = async (req: Request, res: Response, next: NextFunctio
 export const createContract = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const contractData = req.body;
-        const contractUrls = req.files as Express.Multer.File[] || [];
+        const contractFiles = req.files as Express.Multer.File[] || [];
 
-        let imageUrls: string[] = [];
-
-        if (contractUrls.length > 0) { 
-            imageUrls = await Promise.all(contractUrls.map(file => uploadFileToS3(file)));
-        } else if (typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '') {
-            imageUrls = [req.body.imageUrl.trim()];
-        } else {
+        if (!contractFiles.length && !(typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '')) {
             return res.status(400).json({ message: 'Image file or imageUrl is required' });
         }
 
-        const newContract = await createContractService( contractData, imageUrls );
+        const newContract = await createContractService( contractData, contractFiles);
         res.status(201).json(newContract);
     } catch (error) {
         next(error);
@@ -48,27 +42,13 @@ export const updateContract = async (req: Request, res: Response, next: NextFunc
         const { id } = req.params;
         const contractId = Number(id);
         const data = req.body;
-        const contractFiles = [];
-
-        let imageUrl: string = '';
+        const contractFiles = req.files as Express.Multer.File[] || [];
 
         if (isNaN(contractId)) {
             return res.status(400).json({ message: 'Invalid contract ID' });
         }
 
-        if (req.files) {
-            contractFiles.push(...(req.files as Express.Multer.File[]));
-
-            if (contractFiles.length > 0) {
-                const imageUrls = await Promise.all(contractFiles.map(file => uploadFileToS3(file)));
-                
-                if (imageUrls[0]) {
-                    imageUrl = imageUrls[0];
-                }
-            }
-        }
-
-        const updateContract = await updateContractService(contractId, data, imageUrl);
+        const updateContract = await updateContractService(contractId, data, contractFiles);
 
         res.status(200).json(updateContract);
     } catch (error) {
