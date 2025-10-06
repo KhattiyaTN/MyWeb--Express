@@ -19,7 +19,7 @@ model User {
   badges         Badge[]
   certifications Certification[]
   contracts      Contract?
-  image          Image?
+  profile        Profile?
   projects       Project[]
 }
 
@@ -72,6 +72,16 @@ model Project {
   @@index([userId], map: "Project_userId_fkey")
 }
 
+model Profile {
+  id        Int      @id @default(autoincrement())
+  bio       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int      @unique
+  image     Image?
+  user      User     @relation(fields: [userId], references: [id])
+}
+
 model Image {
   id              Int            @id @default(autoincrement())
   url             String
@@ -86,8 +96,8 @@ model Image {
   badge           Badge?         @relation(fields: [badgeId], references: [id])
   certification   Certification? @relation(fields: [certificationId], references: [id])
   contract        Contract?      @relation(fields: [contractId], references: [id])
+  profile         Profile?       @relation(fields: [profileId], references: [id])
   project         Project?       @relation(fields: [projectId], references: [id])
-  user            User?          @relation(fields: [userId], references: [id])
 
   @@index([projectId], map: "Image_projectId_fkey")
 }
