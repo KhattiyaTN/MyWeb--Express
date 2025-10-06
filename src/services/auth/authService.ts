@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import type { User } from "../types/types"
+import type { User } from "../../types/types"
+import { hashPassword } from '../../utils/hashedPassword';
 
 const prisma = new PrismaClient();
 
@@ -13,13 +14,16 @@ export const getUsersService = async (userId: number) => {
 
 // POST user service
 export const addUserService = async (userData: User, imageUrls: string[]) => {
+
+    const hashedPassword = await hashPassword(userData.password);
+
     return await prisma.user.create({ 
         data: {
             firstName: userData.firstName,
             lastName: userData.lastName,
             introduction: userData.introduction,
             email: userData.email,
-            password: "hashed",
+            password: hashedPassword,
             image: imageUrls[0]
                 ? { create: 
                     { 

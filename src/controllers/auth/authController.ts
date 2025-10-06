@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import { uploadFileToS3 } from "../services/aws/uploadService";
-import { getUsersService, addUserService, updateUserService } from "../services/userService";
+import { uploadFileToS3 } from "../../services/aws/uploadService";
+import { getUsersService, addUserService, updateUserService } from "../../services/auth/authService";
 
 // GET
 export const getUser =  async (req: Request, res: Response, next: NextFunction) => {
