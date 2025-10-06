@@ -44,6 +44,14 @@ export interface Project {
     userId: number;
 }
 
+export interface Profile {
+    bio: string;
+    createdAt: Date;
+    updatedAt: Date;
+    // Foreign key to User
+    userId: number;
+}
+
 export interface Image {
     url: string;
     createdAt: Date;

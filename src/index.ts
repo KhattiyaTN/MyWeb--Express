@@ -3,7 +3,7 @@ import type { Request, Response, NextFunction } from 'express';
 import userRoutes from './routes/auth/authRoutes';
 import certRoutes from './routes/certRoutes';
 import badgeRoutes from './routes/badgeRoutes';
-// import profileRoutes from './routes/profileRoutes';
+import profileRoutes from './routes/profileRoutes';
 import projectRoutes from './routes/projectRoutes';
 import contractRoutes from './routes/contactRoutes';
 import cors from 'cors';
@@ -40,7 +40,7 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/certs', certRoutes);
 app.use('/api/badges', badgeRoutes);
-// app.use('/api/profiles', profileRoutes);
+app.use('/api/profile', profileRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/contracts', contractRoutes);
 
