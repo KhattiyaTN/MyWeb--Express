@@ -72,8 +72,22 @@ export const updateContractService = async (id: number, data: Partial<Contract>,
 }
 
 // DELETE contract service
-export const deleteContractService = async (id: number) => {
+export const deleteContractService = async (contractId: number) => {
+    const existingContract = await prisma.contract.findUnique({
+        where: { id: contractId },
+        include: { image: true },
+    });
+
+    if (!existingContract) {
+        throw new Error('Contract not found');
+    }
+
+    if (existingContract?.image?.url) {
+        await deleteFileFromS3(existingContract.image.url);
+    }
+
     return await prisma.contract.delete({
-        where: { id: id },
-    })
+        where: { id: contractId },
+        include: { image: true },
+    });
 }
