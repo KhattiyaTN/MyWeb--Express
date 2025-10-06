@@ -58,7 +58,10 @@ export const updateBadge = async (req: Request, res: Response, next: NextFunctio
 
             if (badgeFiles.length > 0) {
                 const imageUrls = await Promise.all(badgeFiles.map(file => uploadFileToS3(file)));
-                const imageUrl = imageUrls[0];
+
+                if (imageUrls[0]) {
+                    imageUrl = imageUrls[0];
+                }
             }
         }
     
