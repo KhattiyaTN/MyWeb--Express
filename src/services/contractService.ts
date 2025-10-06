@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../config/prismaClient';
 import type { Contract } from '../types/types'
-
-const prisma = new PrismaClient();
 
 // GET contract service
 export const getContractService = async (userId: number) => {

@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../config/prismaClient';
 import type { Project } from '../types/types';
-
-const prisma = new PrismaClient();
 
 // GET All project by ID
 export const getProjectsService = async (userId: number) => {

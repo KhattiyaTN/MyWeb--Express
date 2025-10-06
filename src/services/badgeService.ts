@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../config/prismaClient';
 import type { Badge } from '../types/types';
 import { deleteFileFromS3 } from './aws/deleteService';
-
-const prisma = new PrismaClient();
 
 // GET badges by user ID
 export const getAllBadgesService = async (userId: number) => {

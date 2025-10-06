@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../config/prismaClient';
 import type { Certificate } from "../types/types"
-
-const prisma = new PrismaClient();
 
 // GET certs service
 export const getCertService = async (userId: number) => {
