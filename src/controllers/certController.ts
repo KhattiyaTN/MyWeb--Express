@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
-import { uploadFileToS3 } from "../services/aws/uploadService";
+import { uploadFileToS3 } from "../services/aws/images/uploadImageService";
 import { getCertService, addCertService, updateCertService, deleteCertService } from "../services/certService";
+import type { Expr } from "aws-sdk/clients/cloudsearchdomain";
 
 // GET
 export const getCerts = async (req: Request, res: Response, next: NextFunction) => {
@@ -46,14 +47,29 @@ export const createCert = async (req: Request, res: Response, next: NextFunction
 export const updateCert = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const data = req.body;
         const certId = Number(id);
+        const data = req.body;
+        const certFiles = [];
+
+        let imageUrl = '';
 
         if (isNaN(certId)) {
             return res.status(400).json({ message: 'Invalid certificate ID' });
         }
 
-        const updatedCert = await updateCertService(certId, data);
+        if (req.files) {
+            certFiles.push(...(req.files as Express.Multer.File[]));
+
+            if (certFiles.length > 0) {
+                const imageUrls = await Promise.all(certFiles.map(file => uploadFileToS3(file)));
+
+                if (imageUrls[0]) {
+                    imageUrl = imageUrls[0];
+                }
+            }
+        }
+
+        const updatedCert = await updateCertService(certId, data, imageUrl);
 
         res.status(200).json(updatedCert);
     } catch (error) {

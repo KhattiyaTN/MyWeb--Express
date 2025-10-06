@@ -1,5 +1,6 @@
 import { prisma } from '../config/prismaClient';
 import type { Certificate } from "../types/types"
+import { deleteFileFromS3 } from './aws/deleteImageService';
 
 // GET certs service
 export const getCertService = async (userId: number) => {
@@ -34,15 +35,43 @@ export const addCertService = async (certData: Certificate, imageUrls: string[])
 };
 
 // PATCH update cert service
-export const updateCertService = async (id: number, data: Partial<Certificate>) => {
+export const updateCertService = async (id: number, data: Partial<Certificate>, imageUrl: string) => {
+    const existingCert = await prisma.certification.findUnique({
+        where: { id: id },
+        include: { image: true },
+    });
+
+    if (!existingCert) {
+        throw new Error('Certificate not found');
+    }
+    
+    if (imageUrl && existingCert?.image?.url && existingCert.image.url !== imageUrl) {
+        await deleteFileFromS3(existingCert.image.url);
+    }
+    
     return await prisma.certification.update({
-        where: { id },
+        where: { id: id },
         data: {
-            ...(data.name !== undefined ? { name: data.name.toString() } : {}),
-            ...(data.authority !== undefined ? { authority: data.authority.toString() } : {}),
-            ...(data.licenseNo !== undefined ? { licenseNo: data.licenseNo.toString() } : {}),
-            updatedAt: new Date()
-        }
+            name: data.name,
+            authority: data.authority,
+            licenseNo: data.licenseNo,
+            image: imageUrl 
+                ? {
+                    upsert: {
+                        create: {
+                            url: imageUrl,
+                            createdAt: new Date(),
+                            updatedAt: new Date(),
+                        },
+                        update: {
+                            url: imageUrl,
+                            updatedAt: new Date(),
+                        }
+                    }
+                } : undefined,
+            updatedAt: new Date(),
+        },
+        include: { image: true },
     })
 }
 
