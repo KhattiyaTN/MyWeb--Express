@@ -9,9 +9,25 @@ export const getContractService = async () => {
 }
 
 // POST create contract service
-export const createContractService = async (contract: Contract & { userId: number }) => {
-    // Business logic about keeping contract data to contract table and image path of aws s3 to image table
-}
+export const createContractService = async (contract: Contract, imageUrls: string[]) => {
+    return await prisma.contract.create({
+        data: {
+            name: contract.name,
+            userId: contract.userId,
+            image: imageUrls[0]
+                ? { create: 
+                    {
+                        url: imageUrls[0],
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    }
+                } : undefined,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        },
+        include: { image: true }
+    });
+};
 
 // PATCH update contract service
 export const updateContractService = async (id: number, data: Partial<Contract>) => {

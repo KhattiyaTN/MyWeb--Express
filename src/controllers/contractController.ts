@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { uploadFileToS3 } from '../services/aws/uploadService';
 import { getContractService, createContractService, updateContractService, deleteContractService } from '../services/contractService';
 
 // GET
@@ -14,8 +15,20 @@ export const getContract = async (req: Request, res: Response, next: NextFunctio
 // POST
 export const createContract = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const createContract = req.body;
-        const newContract = await createContractService(createContract);
+        const contractData = req.body;
+        const contractUrls = req.files as Express.Multer.File[] || [];
+
+        let imageUrls: string[] = [];
+
+        if (contractUrls.length > 0) { 
+            imageUrls = await Promise.all(contractUrls.map(file => uploadFileToS3(file)));
+        } else if (typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '') {
+            imageUrls = [req.body.imageUrl.trim()];
+        } else {
+            return res.status(400).json({ message: 'Image file or imageUrl is required' });
+        }
+
+        const newContract = await createContractService( contractData, imageUrls );
         res.status(201).json(newContract);
     } catch (error) {
         next(error);
