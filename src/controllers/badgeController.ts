@@ -26,17 +26,11 @@ export const createBadge = async (req: Request, res: Response, next: NextFunctio
         const badgeData = req.body;
         const badgeFiles = req.files as Express.Multer.File[] || [];
 
-        let imageUrls: string[] = [];
-
-        if (badgeFiles.length > 0) {
-            imageUrls = await Promise.all(badgeFiles.map(file => uploadFileToS3(file)));
-        } else if (typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '') {
-            imageUrls = [req.body.imageUrl.trim()];
-        } else {
+        if (!badgeFiles.length && !(typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '')) {
             return res.status(400).json({ message: 'Image file or imageUrl is required' });
         }
 
-        const newBadge = await createBadgeService(badgeData, imageUrls);
+        const newBadge = await createBadgeService(badgeData, badgeFiles, req.body.imageUrl);
         res.status(201).json(newBadge);
     } catch (error) {
         next(error);
@@ -46,36 +40,20 @@ export const createBadge = async (req: Request, res: Response, next: NextFunctio
 // PATCH
 export const updateBadge = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = req.params;
-        const badgeId = Number(id);
+        const badgeId = Number(req.params.id);
         const data = req.body;
-        const badgeFiles = [];
-
-        let imageUrl: string = '';
+        const badgeFiles = req.files as Express.Multer.File[] || [];
 
         if (isNaN(badgeId)) {
             return res.status(400).json({ message: 'Invalid badge ID' });
         }
 
-        if (req.files) {
-            badgeFiles.push(...(req.files as Express.Multer.File[]));
-
-            if (badgeFiles.length > 0) {
-                const imageUrls = await Promise.all(badgeFiles.map(file => uploadFileToS3(file)));
-
-                if (imageUrls[0]) {
-                    imageUrl = imageUrls[0];
-                }
-            }
-        }
-    
-        const updateBadge = await updateBadgeService(badgeId, data, imageUrl);
-    
-        res.status(200).json(updateBadge);
+        const updatedBadge = await updateBadgeService(badgeId, data, badgeFiles);
+        res.status(200).json(updatedBadge);
     } catch (error) {
         next(error);
     }
-}
+};
 
 // DELETE
 export const deleteBadge = async (req: Request, res: Response, next: NextFunction) => {

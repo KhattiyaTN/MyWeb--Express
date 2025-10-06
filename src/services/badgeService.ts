@@ -1,6 +1,7 @@
 import { prisma } from '../config/prismaClient';
 import type { Badge } from '../types/types';
 import { deleteFileFromS3 } from './aws/deleteImageService';
+import { uploadFileToS3 } from './aws/images/uploadImageService';
 
 // GET badges by user ID
 export const getAllBadgesService = async (userId: number) => {
@@ -12,18 +13,27 @@ export const getAllBadgesService = async (userId: number) => {
 }
 
 // POST create a new badge
-export const createBadgeService = async (badgeData: Badge, imageUrls: string[]) => {
+export const createBadgeService = async (badgeData: Badge, files: Express.Multer.File[], imageUrl?: string) => {
+    let finalImageUrl = '';
+
+    if (files.length > 0) {
+        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
+        finalImageUrl = uploadResults[0] ?? '';
+    } else if (imageUrl?.trim()) {
+        finalImageUrl = imageUrl.trim();
+    }
+
     return await prisma.badge.create({
         data: {
             name: badgeData.name,
             userId: badgeData.userId,
-            image: imageUrls[0]
+            image: finalImageUrl 
                 ? { create: 
                     { 
-                        url: imageUrls[0],
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                    }
+                        url: finalImageUrl, 
+                        createdAt: new Date(), 
+                        updatedAt: new Date() 
+                    } 
                 } : undefined,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -33,7 +43,7 @@ export const createBadgeService = async (badgeData: Badge, imageUrls: string[]) 
 };
 
 // PATCH update a badge by ID
-export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, imageUrl: string) => {
+export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, files: Express.Multer.File[], imageUrl?: string) => {
     const existingBadge = await prisma.badge.findUnique({
         where: { id: badgeId },
         include: { image: true },
@@ -43,7 +53,16 @@ export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, 
         throw new Error('Badge not found');
     }
 
-    if (imageUrl && existingBadge?.image?.url && existingBadge.image.url !== imageUrl) {
+    let finalImageUrl = '';
+
+    if (files.length > 0) {
+        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
+        finalImageUrl = uploadResults[0] ?? '';
+    } else if (imageUrl?.trim()) {
+        finalImageUrl = imageUrl.trim();
+    }
+
+    if (finalImageUrl && existingBadge.image?.url && existingBadge.image.url !== finalImageUrl) {
         await deleteFileFromS3(existingBadge.image.url);
     }
 
@@ -51,25 +70,25 @@ export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, 
         where: { id: badgeId },
         data: {
             name: data.name?.toString(),
-            image: imageUrl ? 
-                { 
+            image: finalImageUrl
+                ? {
                     upsert: {
-                        create: {
-                            url: imageUrl,
-                            createdAt: new Date(),
-                            updatedAt: new Date(),
+                        create: { 
+                            url: finalImageUrl, 
+                            createdAt: new Date(), 
+                            updatedAt: new Date() 
                         },
-                        update: {
-                            url: imageUrl,
-                            updatedAt: new Date(),
-                        }
-                    }
+                        update: { 
+                            url: finalImageUrl, 
+                            updatedAt: new Date() 
+                        },
+                    },
                 } : undefined,
             updatedAt: new Date(),
         },
         include: { image: true },
-    })
-}
+    });
+};
 
 // DELETE a badge by ID
 export const deleteBadgeService = async (badgeId: number) => {
