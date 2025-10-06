@@ -1,6 +1,7 @@
 import { prisma } from '../config/prismaClient';
 import type { Certificate } from "../types/types"
 import { deleteFileFromS3 } from './aws/deleteImageService';
+import { uploadFileToS3 } from './aws/images/uploadImageService';
 
 // GET certs service
 export const getCertService = async (userId: number) => {
@@ -12,17 +13,26 @@ export const getCertService = async (userId: number) => {
 }
 
 // POST add cert service
-export const addCertService = async (certData: Certificate, imageUrls: string[]) => {
+export const addCertService = async (certData: Certificate, files: Express.Multer.File[], imageUrl?: string) => {
+    let finalImageUrl = '';
+
+    if (files.length > 0) {
+        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
+        finalImageUrl = uploadResults[0] ?? '';
+    } else if (imageUrl?.trim()) {
+        finalImageUrl = imageUrl.trim();
+    }
+
     return await prisma.certification.create({
         data: {
             name: certData.name,
             authority: certData.authority,
             licenseNo: certData.licenseNo,
             userId: certData.userId,
-            image: imageUrls[0]
-                ? { create: 
-                    { 
-                        url: imageUrls[0],
+            image: finalImageUrl
+                ? { create:
+                    {
+                        url: finalImageUrl,
                         createdAt: new Date(),
                         updatedAt: new Date(),
                     }

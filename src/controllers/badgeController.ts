@@ -30,7 +30,7 @@ export const createBadge = async (req: Request, res: Response, next: NextFunctio
             return res.status(400).json({ message: 'Image file or imageUrl is required' });
         }
 
-        const newBadge = await createBadgeService(badgeData, badgeFiles, req.body.imageUrl);
+        const newBadge = await createBadgeService(badgeData, badgeFiles);
         res.status(201).json(newBadge);
     } catch (error) {
         next(error);

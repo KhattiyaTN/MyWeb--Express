@@ -26,17 +26,11 @@ export const createCert = async (req: Request, res: Response, next: NextFunction
         const certData = req.body;
         const certFiles = req.files as Express.Multer.File[] || [];
 
-        let imageUrls: string[] = [];
-
-        if (certFiles.length > 0) {
-            imageUrls = await Promise.all(certFiles.map(file => uploadFileToS3(file)));
-        } else if (typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '') {
-            imageUrls = [req.body.imageUrl.trim()];
-        } else {
+        if (!certFiles.length && !(typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '')) {
             return res.status(400).json({ message: 'Image file or imageUrl is required' });
         }
 
-        const newCert = await addCertService(certData, imageUrls);
+        const newCert = await addCertService(certData, certFiles);
         res.status(201).json(newCert);
     } catch (error) {
         next(error);
