@@ -11,8 +11,24 @@ export const getAllProjectService = async (id: number) => {
 }
 
 // POST create project
-export const createProjectService = async (data: Project) => {
-    // Business logic about keeping project data to project table and image path of aws s3 to image table
+export const createProjectService = async (projectData: Project, imageUrls: string[]) => {
+    return await prisma.project.create({
+        data: {
+            name: projectData.name,
+            description: projectData.description,
+            userId: projectData.userId,
+            images: imageUrls.length > 0 ? {
+                create: imageUrls.map(url => ({
+                    url,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                }))
+            }: undefined,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        },
+        include: { images: true },
+    });
 }
 
 // PATCH edit project
