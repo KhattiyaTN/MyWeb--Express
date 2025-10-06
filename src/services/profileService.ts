@@ -1,6 +1,7 @@
 import { prisma } from '../config/prismaClient';
 import type { Profile } from '../types/types'
 import { deleteFileFromS3 } from './aws/deleteImageService';
+import { uploadFileToS3 } from './aws/images/uploadImageService';
 
 // GET profile by user ID
 export const getProfileService = async (userId: number) => {
@@ -11,15 +12,22 @@ export const getProfileService = async (userId: number) => {
 };
 
 // POST create a new profile
-export const createProfileService = async (profileData: Profile, imageUrls: string[]) => {
+export const createProfileService = async (profileData: Profile, files: Express.Multer.File[]) => {
+    let finalImageUrl = '';
+
+    if (files.length > 0) {
+        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
+        finalImageUrl = uploadResults[0] ?? '';
+    }
+    
     return prisma.profile.create({
         data: { 
             bio: profileData.bio,
             userId: profileData.userId,
-            image: imageUrls[0] 
+            image: finalImageUrl
                 ? { create:
                     {
-                        url: imageUrls[0],
+                        url: finalImageUrl,
                         createdAt: new Date(),
                         updatedAt: new Date(),
                     }
@@ -32,7 +40,7 @@ export const createProfileService = async (profileData: Profile, imageUrls: stri
 };
 
 // PATCH update a profile by user ID
-export const updateProfileService = async (userId: number, data: Partial<Profile>, imageUrl: string) => {
+export const updateProfileService = async (userId: number, data: Partial<Profile>, files: Express.Multer.File[]) => {
     const existingProfile = await prisma.profile.findUnique({
         where: { userId: userId },
         include: { image: true },
@@ -42,7 +50,14 @@ export const updateProfileService = async (userId: number, data: Partial<Profile
         throw new Error('Profile not found');
     }
 
-    if (imageUrl && existingProfile?.image?.url && existingProfile.image.url !== imageUrl) {
+    let finalImageUrl = '';
+
+    if (files.length > 0) {
+        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
+        finalImageUrl = uploadResults[0] ?? '';
+    }
+
+    if (finalImageUrl && existingProfile?.image?.url && existingProfile.image.url !== finalImageUrl) {
         await deleteFileFromS3(existingProfile.image.url);
     }
         
@@ -50,16 +65,16 @@ export const updateProfileService = async (userId: number, data: Partial<Profile
         where: { userId: userId },
         data: {
             bio: data.bio,
-            image: imageUrl
+            image: finalImageUrl
                 ? {
                     upsert: {
                         create: {
-                            url: imageUrl,
+                            url: finalImageUrl,
                             createdAt: new Date(),
                             updatedAt: new Date(),
                         },
                         update: {
-                            url: imageUrl,
+                            url: finalImageUrl,
                             updatedAt: new Date(),
                         }
                     }
