@@ -1,6 +1,6 @@
 import { prisma } from '../config/prismaClient';
 import type { Badge } from '../types/types';
-import { deleteFileFromS3 } from './aws/deleteService';
+import { deleteFileFromS3 } from './aws/deleteImageService';
 
 // GET badges by user ID
 export const getAllBadgesService = async (userId: number) => {
@@ -39,6 +39,10 @@ export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, 
         include: { image: true },
     });
 
+    if (!existingBadge) {
+        throw new Error('Badge not found');
+    }
+
     if (imageUrl && existingBadge?.image?.url && existingBadge.image.url !== imageUrl) {
         await deleteFileFromS3(existingBadge.image.url);
     }
@@ -69,7 +73,21 @@ export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, 
 
 // DELETE a badge by ID
 export const deleteBadgeService = async (badgeId: number) => {
-    await prisma.badge.delete({
-        where: { id: badgeId }
+    const existingBadge = await prisma.badge.findUnique({
+        where: { id: badgeId },
+        include: { image: true },
+    })
+
+    if (!existingBadge) {
+        throw new Error('Badge not found');
+    }
+
+    if (existingBadge?.image?.url) {
+        await deleteFileFromS3(existingBadge.image.url);
+    }
+
+    return await prisma.badge.delete({
+        where: { id: badgeId },
+        include: { image: true },
     })
 }

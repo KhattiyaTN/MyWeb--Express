@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { uploadFileToS3 } from '../services/aws/uploadService';
+import { uploadFileToS3 } from '../services/aws/images/uploadImageService';
 import { getAllBadgesService, createBadgeService, updateBadgeService, deleteBadgeService } from '../services/badgeService';
 
 // GET
@@ -53,6 +53,10 @@ export const updateBadge = async (req: Request, res: Response, next: NextFunctio
 
         let imageUrl: string = '';
 
+        if (isNaN(badgeId)) {
+            return res.status(400).json({ message: 'Invalid badge ID' });
+        }
+
         if (req.files) {
             badgeFiles.push(...(req.files as Express.Multer.File[]));
 
@@ -63,10 +67,6 @@ export const updateBadge = async (req: Request, res: Response, next: NextFunctio
                     imageUrl = imageUrls[0];
                 }
             }
-        }
-    
-        if (isNaN(badgeId)) {
-            return res.status(400).json({ message: 'Invalid badge ID' });
         }
     
         const updateBadge = await updateBadgeService(badgeId, data, imageUrl);
