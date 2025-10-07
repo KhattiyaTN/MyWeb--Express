@@ -1,5 +1,5 @@
-import { s3 } from '../../../config/s3Client';
-import { resizeImage } from '../../../utils/imageUtils'
+import { s3 } from '../../../config/aws/s3Client';
+import { resizeImage } from '../../../utils/aws/imageUtils'
 
 export const uploadFileToS3 = async (file: Express.Multer.File): Promise<string> => {
     
