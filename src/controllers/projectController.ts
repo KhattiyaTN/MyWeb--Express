@@ -25,43 +25,16 @@ export const createProject = async (req: Request, res: Response, next: NextFunct
         const projectData = req.body;
         const projectFiles = req.files as Express.Multer.File[] || [];
 
-        let imageUrls: string[] = [];
-
-        if (projectFiles.length > 0) {
-            const uploadResults = await Promise.allSettled(
-                projectFiles.map(file => uploadFileToS3(file))
-            );
-
-            const successfulUploads = uploadResults
-                .filter((result): result is PromiseFulfilledResult<string> => result.status === 'fulfilled')
-                .map(result => result.value);
-
-            const failedUploads = uploadResults
-                .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
-                .map(result => result.reason?.message || 'Unknown error');
-
-            if (successfulUploads.length === 0) {
-                return res.status(400).json({
-                    message: 'Failed to upload any images',
-                    errors: failedUploads,
-                });
-            }
-
-            imageUrls = successfulUploads;
-
-        } else if (typeof req.body.imageUrl === 'string' && req.body.imageUrl) {
-            imageUrls = [req.body.imageUrl];
-        } else {
+        if (!projectFiles.length) {
             return res.status(400).json({ message: 'Image file or imageUrl is required' });
         }
 
-        const project = await createProjectService( projectData, imageUrls );
-        
+        const project = await createProjectService(projectData, projectFiles);
         res.status(201).json(project);
     } catch (error) {
         next(error);
     }
-}
+};
 
 // PATCH
 export const updateProject = async (req: Request, res: Response, next: NextFunction) => {

@@ -26,7 +26,7 @@ export const createCert = async (req: Request, res: Response, next: NextFunction
         const certData = req.body;
         const certFiles = req.files as Express.Multer.File[] || [];
 
-        if (!certFiles.length && !(typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '')) {
+        if (!certFiles.length) {
             return res.status(400).json({ message: 'Image file or imageUrl is required' });
         }
 

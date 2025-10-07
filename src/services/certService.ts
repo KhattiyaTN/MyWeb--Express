@@ -13,14 +13,12 @@ export const getCertService = async (userId: number) => {
 }
 
 // POST add cert service
-export const addCertService = async (certData: Certificate, files: Express.Multer.File[], imageUrl?: string) => {
+export const addCertService = async (certData: Certificate, files: Express.Multer.File[]) => {
     let finalImageUrl = '';
 
     if (files.length > 0) {
         const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
         finalImageUrl = uploadResults[0] ?? '';
-    } else if (imageUrl?.trim()) {
-        finalImageUrl = imageUrl.trim();
     }
 
     return await prisma.certification.create({
@@ -45,7 +43,7 @@ export const addCertService = async (certData: Certificate, files: Express.Multe
 };
 
 // PATCH update cert service
-export const updateCertService = async (id: number, data: Partial<Certificate>, files: Express.Multer.File[], imageUrl?: string) => {
+export const updateCertService = async (id: number, data: Partial<Certificate>, files: Express.Multer.File[]) => {
     const existingCert = await prisma.certification.findUnique({
         where: { id: id },
         include: { image: true },
@@ -60,8 +58,6 @@ export const updateCertService = async (id: number, data: Partial<Certificate>, 
     if (files.length > 0) {
         const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
         finalImageUrl = uploadResults[0] ?? '';
-    } else if (imageUrl?.trim()) {
-        finalImageUrl = imageUrl.trim();
     }
 
     if (finalImageUrl && existingCert?.image?.url && existingCert.image.url !== finalImageUrl) {

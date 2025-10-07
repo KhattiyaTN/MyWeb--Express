@@ -13,14 +13,12 @@ export const getContractService = async (userId: number) => {
 }
 
 // POST create contract service
-export const createContractService = async (contract: Contract,  files: Express.Multer.File[], imageUrl?: string) => {
+export const createContractService = async (contract: Contract,  files: Express.Multer.File[]) => {
     let finalImageUrl = '';
 
     if (files.length > 0) {
         const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
         finalImageUrl = uploadResults[0] ?? '';
-    } else if (imageUrl?.trim()) {
-        finalImageUrl = imageUrl.trim();
     }
     
     return await prisma.contract.create({
@@ -43,7 +41,7 @@ export const createContractService = async (contract: Contract,  files: Express.
 };
 
 // PATCH update contract service
-export const updateContractService = async (id: number, data: Partial<Contract>, files: Express.Multer.File[], imageUrl?: string) => {
+export const updateContractService = async (id: number, data: Partial<Contract>, files: Express.Multer.File[]) => {
     const existingContract = await prisma.contract.findUnique({ 
         where: { id },
         include: { image: true },
@@ -58,8 +56,6 @@ export const updateContractService = async (id: number, data: Partial<Contract>,
     if (files.length > 0) {
         const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
         finalImageUrl = uploadResults[0] ?? '';
-    } else if (imageUrl?.trim()) {
-        finalImageUrl = imageUrl.trim();
     }
 
     if (finalImageUrl && existingContract?.image?.url && existingContract.image.url !== finalImageUrl) {

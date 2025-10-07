@@ -12,26 +12,34 @@ export const getProjectsService = async (userId: number) => {
     })
 }
 
-// POST create project
-export const createProjectService = async (projectData: Project, imageUrls: string[]) => {
+// POST create new project
+export const createProjectService = async (projectData: Project, files: Express.Multer.File[]) => {
+    let finalImageUrls: string[] = [];
+
+    if (files.length > 0) {
+        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
+        finalImageUrls = uploadResults;
+    }
+
     return await prisma.project.create({
         data: {
             name: projectData.name,
             description: projectData.description,
             userId: projectData.userId,
-            images: imageUrls.length > 0 ? {
-                create: imageUrls.map(url => ({
-                    url,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                }))
-            }: undefined,
+            images: finalImageUrls.length > 0
+                ? { create: 
+                    finalImageUrls.map(url => ({ 
+                        url, 
+                        createdAt: new Date(), 
+                        updatedAt: new Date() 
+                    })) 
+                }: undefined,
             createdAt: new Date(),
             updatedAt: new Date(),
         },
         include: { images: true },
     });
-}
+};
 
 // PATCH edit project
 export const updateProjectService = async (id: number, data: Partial<Project>, imageFiles: Express.Multer.File[]) => {

@@ -25,11 +25,11 @@ export const createContract = async (req: Request, res: Response, next: NextFunc
         const contractData = req.body;
         const contractFiles = req.files as Express.Multer.File[] || [];
 
-        if (!contractFiles.length && !(typeof req.body.imageUrl === 'string' && req.body.imageUrl.trim() !== '')) {
+        if (!contractFiles.length) {
             return res.status(400).json({ message: 'Image file or imageUrl is required' });
         }
 
-        const newContract = await createContractService( contractData, contractFiles);
+        const newContract = await createContractService(contractData, contractFiles);
         res.status(201).json(newContract);
     } catch (error) {
         next(error);
