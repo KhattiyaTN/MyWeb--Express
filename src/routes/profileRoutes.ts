@@ -4,7 +4,7 @@ import { getProfile, createProfile, updateProfile, deleteProfile } from '../cont
 
 const router = Router();
 
-router.get('/:id', getProfile);
+router.get('/', getProfile);
 router.post('/', upload.array('images', 1), createProfile);
 router.patch('/:id', upload.array('images', 1), updateProfile);
 router.delete('/:id', deleteProfile);

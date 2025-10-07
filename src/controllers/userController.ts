@@ -4,11 +4,15 @@ import { getUsersService, addUserService, updateUserService } from "../services/
 // GET
 export const getUser =  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = req.params;
+        if (!req.user || typeof req.user.id !== 'number') {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const id = req.user.id;
         const userId = Number(id);
 
         if (isNaN(userId)) {
-            return res.status(400).json({ message: 'Invelid user ID' });
+            return res.status(400).json({ message: 'Invalid user ID' });
         }
 
         const users = await getUsersService(userId);
@@ -33,9 +37,13 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 // PATCH
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = req.params;
-        const data = req.body
+        if (!req.user || typeof req.user.id !== 'number') {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const id = req.user.id;
         const userId = Number(id);
+        const data = req.body;
 
         if (isNaN(userId)) {
             return res.status(400).json({ message: 'Invalid user ID' });

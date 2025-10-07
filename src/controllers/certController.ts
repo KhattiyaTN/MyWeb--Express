@@ -4,7 +4,11 @@ import { getCertService, addCertService, updateCertService, deleteCertService } 
 // GET
 export const getCerts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = req.params;
+        if (!req.user || typeof req.user.id !== 'number') {
+            return res.status(400).json({ message: 'User not authenticated or ID missing' });
+        }
+        
+        const id = req.user.id;
         const userId = Number(id);
 
         if (isNaN(userId)) {

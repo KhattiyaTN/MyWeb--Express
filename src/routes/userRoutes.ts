@@ -3,8 +3,8 @@ import { getUser, createUser, updateUser } from '../controllers/userController.t
 
 const router = Router();
 
-router.get('/:id', getUser);
+router.get('/', getUser);
 router.post('/', createUser);
-router.patch('/:id', updateUser);
+router.patch('/', updateUser);
 
 export default router;

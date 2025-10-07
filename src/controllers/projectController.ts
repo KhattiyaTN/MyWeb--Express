@@ -4,7 +4,11 @@ import { getProjectsService, createProjectService, updateProjectService, deleteP
 // GET
 export const getProjects = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = req.params
+        if (!req.user || typeof req.user.id !== 'number') {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const id = req.user.id;
         const userId = Number(id);
 
         if (isNaN(userId)) {

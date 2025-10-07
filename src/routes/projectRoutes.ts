@@ -4,7 +4,7 @@ import { getProjects, createProject, updateProject, deleteProject } from '../con
 
 const router = Router();
 
-router.get('/:id', getProjects);
+router.get('/', getProjects);
 router.post('/', upload.array('images', 10), createProject);
 router.patch('/:id', upload.array('images', 10), updateProject);
 router.delete('/:id', deleteProject);
