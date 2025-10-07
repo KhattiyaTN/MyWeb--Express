@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "aws-sdk": "^2.1692.0",
     "cors": "^2.8.5",

@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import type { User } from "../../types/types"
-import { hashPassword } from '../../utils/hashedPassword';
+import type { User } from "../types/types"
+import { hashPassword } from '../utils/hashedPassword';
 
 const prisma = new PrismaClient();
 

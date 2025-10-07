@@ -7,7 +7,7 @@ import { limiter } from './config/rateLimit';
 import { errorHandler } from './config/errorHandler';
 import { helmetMiddlewares } from './config/helmetOption';
 
-import authRoutes from './routes/auth/authRoutes';
+import authRoutes from './routes/userRoutes';
 import certRoutes from './routes/certRoutes';
 import badgeRoutes from './routes/badgeRoutes';
 import profileRoutes from './routes/profileRoutes';
