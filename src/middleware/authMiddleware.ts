@@ -3,18 +3,24 @@ import type { Request, Response, NextFunction } from "express";
 import type { jwtPayload } from '../types/jwt_type';
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
+    const authHeader = req.headers.authorization || '';
+    const [ schema, token ] = authHeader.split(' ');
+    const secret = process.env.JWT_SECRET;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const token = authHeader.split(' ')[1];
-    if (!token) {
+    if(schema !== 'Bearer' || !token) {
         return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    if (!secret) {
+        return res.status(500).json({ message: 'Server misconfigured' });
     }
 
     try {
-        const payload = jwt.verify(token, process.env.JWT_SECRET!) as jwtPayload;
+        const payload = jwt.verify(token, secret) as jwtPayload;
         req.user = payload;
         next();
     } catch (error) {

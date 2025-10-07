@@ -6,13 +6,15 @@ import morgan = require('morgan');
 import { limiter } from './config/rateLimit';
 import { errorHandler } from './config/errorHandler';
 import { helmetMiddlewares } from './config/helmetOption';
+import { corsOptions } from './config/cors';
+import { authenticate } from './middleware/authMiddleware';
 
-import authRoutes from './routes/userRoutes';
+import authRoutes from './routes/auth/authRoutes';
 import certRoutes from './routes/certRoutes';
 import badgeRoutes from './routes/badgeRoutes';
 import profileRoutes from './routes/profileRoutes';
 import projectRoutes from './routes/projectRoutes';
-import contractRoutes from './routes/contactRoutes';
+import contractRoutes from './routes/contractRoutes';
 
 dotenv.config();
 
@@ -21,22 +23,26 @@ const app = express();
 // Logging
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
+// Body parser
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true }));
+
 // Rate limiting
 app.use(limiter);
 
 // CORS
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
+app.use(cors(corsOptions));
 
 // Security headers
 helmetMiddlewares.forEach(mw => app.use(mw));
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/certs', certRoutes);
-app.use('/api/badges', badgeRoutes);
-app.use('/api/profile', profileRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/contracts', contractRoutes);
+app.use('/api/certs', authenticate, certRoutes);
+app.use('/api/badges', authenticate, badgeRoutes);
+app.use('/api/profile', authenticate, profileRoutes);
+app.use('/api/projects', authenticate, projectRoutes);
+app.use('/api/contracts', authenticate, contractRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

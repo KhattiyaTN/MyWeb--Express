@@ -6,7 +6,7 @@ import type { User } from "../../types/schema_type"
 export const registerService = async (userData: User) => {
     const hashedPassword = await hashPassword(userData.password);
 
-    return await prisma.user.create({
+    const created = await prisma.user.create({
         data: {
             firstName: userData.firstName,
             lastName: userData.lastName,
@@ -15,6 +15,17 @@ export const registerService = async (userData: User) => {
             password: hashedPassword,
             createdAt: new Date(),
             updatedAt: new Date(),
+        },
+        select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            introduction: true,
+            email: true,
+            createdAt: true,
+            updatedAt: true,
         }
     });
+
+    return created;
 };

@@ -5,6 +5,7 @@ import { comparePassword } from '../../utils/comparePassword';
 // Login
 export const loginService = async (email: string, password: string) => {
     const user = await prisma.user.findUnique({ where: { email }});
+
     if (!user) {
         throw new Error('Invalid email or password');
     }
@@ -14,17 +15,22 @@ export const loginService = async (email: string, password: string) => {
         throw new Error('Invalid email or password');
     }
 
+    const secret = process.env.JWT_SECRET!;
+    if (!secret) {
+        throw new Error('Server misconfigured: JWT_SECRET is missing');
+    }
+
     const token = jwt.sign(
         {
-            id: user.id,
+            sub: String(user.id),
             email: user.email,
-            password: user.password,
+            iat: Date.now(),
         },
-        process.env.JWT_SECRET || 'default_secret',
+        secret,
         {
             expiresIn: '1h',
         }
     );
 
-    return { token, user }
+    return token;
 }
