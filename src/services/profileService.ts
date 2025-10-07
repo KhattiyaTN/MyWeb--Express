@@ -1,5 +1,5 @@
 import { prisma } from '../config/prismaClient';
-import type { Profile } from '../types/types'
+import type { Profile } from '../types/schema_type'
 import { deleteFileFromS3 } from './aws/deleteImageService';
 import { uploadFileToS3 } from './aws/images/uploadImageService';
 

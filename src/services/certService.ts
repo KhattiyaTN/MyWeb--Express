@@ -1,5 +1,5 @@
 import { prisma } from '../config/prismaClient';
-import type { Certificate } from "../types/types"
+import type { Certificate } from "../types/schema_type"
 import { deleteFileFromS3 } from './aws/deleteImageService';
 import { uploadFileToS3 } from './aws/images/uploadImageService';
 
