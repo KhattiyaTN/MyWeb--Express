@@ -1,4 +1,4 @@
-import { s3 } from '../../config/s3Client';
+import { s3 } from '../../../config/s3Client';
 
 export const deleteFileFromS3 = async (fileUrl: string): Promise<void> => {
 

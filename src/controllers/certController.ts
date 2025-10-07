@@ -1,7 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { uploadFileToS3 } from "../services/aws/images/uploadImageService";
 import { getCertService, addCertService, updateCertService, deleteCertService } from "../services/certService";
-import type { Expr } from "aws-sdk/clients/cloudsearchdomain";
 
 // GET
 export const getCerts = async (req: Request, res: Response, next: NextFunction) => {

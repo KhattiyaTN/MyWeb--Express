@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from 'express';
-import { uploadFileToS3 } from '../services/aws/images/uploadImageService';
 import { getAllBadgesService, createBadgeService, updateBadgeService, deleteBadgeService } from '../services/badgeService';
 
 // GET
