@@ -10,17 +10,20 @@ datasource db {
 model User {
   id             Int             @id @default(autoincrement())
   email          String          @unique
+  createdAt      DateTime        @default(now())
   firstName      String
   introduction   String?
   lastName       String
   password       String
-  createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+  emailVerified  DateTime?
+  accounts       Account[]
   badges         Badge[]
   certifications Certification[]
   contracts      Contract?
   profile        Profile?
   projects       Project[]
+  refreshTokens  RefreshToken[]
 }
 
 model Contract {
@@ -102,10 +105,45 @@ model Image {
   @@index([projectId], map: "Image_projectId_fkey")
 }
 
+model Account {
+  id                Int     @id @default(autoincrement())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  scope             String?
+  token_type        String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId], map: "Account_userId_fkey")
+}
+
+model RefreshToken {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  revokedAt  DateTime?
+  replacedBy String?
+  ipAddress  String?
+  userAgent  String?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "RefreshToken_userId_fkey")
+  @@index([expiresAt], map: "RefreshToken_expiresAt_fkey")
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique
-  expires    DateTime
+  expiresAt  DateTime
 
   @@unique([identifier, token])
 }

@@ -1,6 +1,6 @@
 import { prisma } from '../config/prismaClient';
 import type { Project } from '../types/schema_type';
-import { deleteFileFromS3 } from './aws/deleteImageService';
+import { deleteFileFromS3 } from './aws/images/deleteImageService';
 import { uploadFileToS3 } from './aws/images/uploadImageService';
 
 // GET All project by ID

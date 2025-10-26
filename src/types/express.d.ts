@@ -1,9 +1,9 @@
-import { jwtPayload } from './jwt_type';
+import { JwtPayload } from './jwt_type';
 
 declare global {
     namespace Express {
         interface Request {
-            user?: jwtPayload;
+            user?: JwtPayload;
         }
     }
 }
