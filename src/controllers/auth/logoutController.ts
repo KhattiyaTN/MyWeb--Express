@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { logoutService } from '../../services/auth/logoutService';
+import { logoutService } from '@services/auth/logoutService';
 
 export const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
     try {

@@ -3,18 +3,18 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan = require('morgan');
-import { limiter } from './config/rateLimit';
-import { errorHandler } from './config/errorHandler';
-import { helmetMiddlewares } from './config/helmetOption';
-import { corsOptions } from './config/cors';
-import { authenticate } from './middleware/authMiddleware';
+import { limiter } from '@config/rateLimit';
+import { errorHandler } from '@config/errorHandler';
+import { helmetMiddlewares } from '@config/helmetOption';
+import { corsOptions } from '@config/cors';
+import { authenticate } from '@middleware/authMiddleware';
 
-import authRoutes from './routes/auth/authRoutes';
-import certRoutes from './routes/certRoutes';
-import badgeRoutes from './routes/badgeRoutes';
-import profileRoutes from './routes/profileRoutes';
-import projectRoutes from './routes/projectRoutes';
-import contractRoutes from './routes/contractRoutes';
+import authRoutes from '@routes/auth/authRoutes';
+import certRoutes from '@routes/certRoutes';
+import badgeRoutes from '@routes/badgeRoutes';
+import profileRoutes from '@routes/profileRoutes';
+import projectRoutes from '@routes/projectRoutes';
+import contractRoutes from '@routes/contractRoutes';
 
 dotenv.config();
 

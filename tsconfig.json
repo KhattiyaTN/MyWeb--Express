@@ -6,6 +6,18 @@
     "module": "Preserve",
     "moduleDetection": "force",
     "allowJs": true,
+    "baseUrl": ".",
+    "paths": {
+      "@config/*": ["src/config/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@services/*": ["src/services/*"],
+      "@awsServices/*": ["src/services/upload/aws/*"],
+      "@cloudinaryServices/*": ["src/services/upload/cloudinary/*"],
+      "@tokenServices/*": ["src/services/auth/token/*"],
+      "@middleware/*": ["src/middleware/*"],
+      "@routes/*": ["src/routes/*"],
+      "@utils/*": ["src/utils/*"],
+    },
 
     // Bundler mode
     "moduleResolution": "bundler",

@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { getAllBadgesService, createBadgeService, updateBadgeService, deleteBadgeService } from '../services/badgeService';
+import { getAllBadgesService, createBadgeService, updateBadgeService, deleteBadgeService } from '@services/badgeService';
 
 // GET
 export const getBadges = async (req: Request, res: Response, next: NextFunction) => {

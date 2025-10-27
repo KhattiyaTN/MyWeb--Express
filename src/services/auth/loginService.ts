@@ -1,6 +1,6 @@
-import { prisma } from '../../config/prismaClient';
-import { comparePassword } from '../../utils/comparePassword';
-import { generateTokenService } from './token/geneteTokenService';
+import { prisma } from '@config/prismaClient';
+import { comparePassword } from '@utils/comparePassword';
+import { generateTokenService } from '@tokenServices/geneteTokenService';
 
 // Login
 export const loginService = async (email: string, password: string, ip: string, userAgent: string) => {

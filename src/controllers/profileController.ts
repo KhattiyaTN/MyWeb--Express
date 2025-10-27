@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { getProfileService, createProfileService, updateProfileService, deleteProfileService } from '../services/profileService';
+import { getProfileService, createProfileService, updateProfileService, deleteProfileService } from '@services/profileService';
 
 // GET
 export const getProfile = async (req: Request, res: Response, next: NextFunction) => {

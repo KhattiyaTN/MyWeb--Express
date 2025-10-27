@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { getCertService, addCertService, updateCertService, deleteCertService } from "../services/certService";
+import { getCertService, addCertService, updateCertService, deleteCertService } from "@services/certService";
 
 // GET
 export const getCerts = async (req: Request, res: Response, next: NextFunction) => {

@@ -1,6 +1,6 @@
-import { prisma } from '../../config/prismaClient';
-import { hashPassword } from '../../utils/hashedPassword';
-import type { User } from "../../types/schema_type"
+import { prisma } from '@config/prismaClient';
+import { hashPassword } from '@utils/hashedPassword';
+import type { User } from "../../types/schema_type";
 
 // Register
 export const registerService = async (userData: User) => {

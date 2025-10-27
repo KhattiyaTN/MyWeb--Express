@@ -1,7 +1,7 @@
-import { prisma } from '../config/prismaClient';
+import { prisma } from '@config/prismaClient';
 import type { Certificate } from "../types/schema_type"
-import { deleteFileFromS3 } from './aws/images/deleteImageService';
-import { uploadFileToS3 } from './aws/images/uploadImageService';
+import { deleteFileFromS3 } from '@awsServices/images/deleteImageService';
+import { uploadFileToS3 } from '@awsServices/images/uploadImageService';
 
 // GET certs service
 export const getCertService = async (userId: number) => {

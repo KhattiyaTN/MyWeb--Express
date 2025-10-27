@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { upload } from '../middleware/uploadMiddleware';
-import { getBadges, createBadge, updateBadge, deleteBadge } from '../controllers/badgeController';
+import { upload } from '@middleware/uploadMiddleware';
+import { getBadges, createBadge, updateBadge, deleteBadge } from '@controllers/badgeController';
 
 const router = Router();
 

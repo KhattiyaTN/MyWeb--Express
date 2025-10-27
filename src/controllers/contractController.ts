@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { getContractService, createContractService, updateContractService, deleteContractService } from '../services/contractService';
+import { getContractService, createContractService, updateContractService, deleteContractService } from '@services/contractService';
 
 // GET
 export const getContract = async (req: Request, res: Response, next: NextFunction) => {

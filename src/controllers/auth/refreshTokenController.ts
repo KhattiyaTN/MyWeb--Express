@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { refreshAccessTokenService } from '../../services/auth/token/refreshAccessTokenService';
+import { refreshAccessTokenService } from '@services/auth/token/refreshAccessTokenService';
 
 export const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     try {

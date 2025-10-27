@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { upload } from '../middleware/uploadMiddleware';
-import { getContract, createContract, updateContract, deleteContract } from '../controllers/contractController';
+import { upload } from '@middleware/uploadMiddleware';
+import { getContract, createContract, updateContract, deleteContract } from '@controllers/contractController';
 
 const router = Router();
 

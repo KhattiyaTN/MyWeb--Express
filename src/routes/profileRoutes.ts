@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { upload } from '../middleware/uploadMiddleware';
-import { getProfile, createProfile, updateProfile, deleteProfile } from '../controllers/profileController';
+import { upload } from '@middleware/uploadMiddleware';
+import { getProfile, createProfile, updateProfile, deleteProfile } from '@controllers/profileController';
 
 const router = Router();
 

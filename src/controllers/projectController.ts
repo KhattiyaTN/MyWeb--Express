@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
-import { getProjectsService, createProjectService, updateProjectService, deleteProjectService } from '../services/projectService';
+import { getProjectsService, createProjectService, updateProjectService, deleteProjectService } from '@services/projectService';
 
 // GET
 export const getProjects = async (req: Request, res: Response, next: NextFunction) => {

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { prisma } from '../../../config/prismaClient';
+import { prisma } from '@config/prismaClient';
 import type { User } from '@prisma/client';
 
 const ACCESS_TOKEN_EXPIRY = '15m';

@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { loginUser } from '../../controllers/auth/loginController';
-import { registerUser } from '../../controllers/auth/registerController';
-import { logoutUser } from '../../controllers/auth/logoutController';
-import { refreshToken } from '../../controllers/auth/refreshTokenController';
-import { loginLimiter, refreshLimiter } from '../../config/rateLimit';
+import { loginUser } from '@controllers/auth/loginController';
+import { registerUser } from '@controllers/auth/registerController';
+import { logoutUser } from '@controllers/auth/logoutController';
+import { refreshToken } from '@controllers/auth/refreshTokenController';
+import { loginLimiter, refreshLimiter } from '@config/rateLimit';
 
 const router = Router();
 

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { prisma } from '../../config/prismaClient';
+import { prisma } from '@config/prismaClient';
 
 // Logout
 export const logoutService = async (refreshToken: string) => {

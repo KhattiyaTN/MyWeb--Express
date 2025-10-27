@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { upload } from '../middleware/uploadMiddleware';
-import { getCerts, createCert, updateCert, deleteCert } from '../controllers/certController';
+import { upload } from '@middleware/uploadMiddleware';
+import { getCerts, createCert, updateCert, deleteCert } from '@controllers/certController';
 
 const router = Router();
 

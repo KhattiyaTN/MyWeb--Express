@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { upload } from '../middleware/uploadMiddleware';
-import { getProjects, createProject, updateProject, deleteProject } from '../controllers/projectController';
+import { upload } from '@middleware/uploadMiddleware';
+import { getProjects, createProject, updateProject, deleteProject } from '@controllers/projectController';
 
 const router = Router();
 
