@@ -1,5 +1,6 @@
 import { cloudinary } from '@config/upload/cloudinary';
 import type { UploadApiOptions, UploadApiResponse } from 'cloudinary';
+import { resizeImage } from '@utils/upload/imageUtils';
 
 const cloudinaryFolder = process.env.CLOUDINARY_FOLDER;
 
@@ -9,6 +10,9 @@ export const uploadBufferToCloudinary = async (
     options: UploadApiOptions = {}
 ) => {
     return new Promise<UploadApiResponse>((resolve, reject) => {
+        
+        const resizeImg = resizeImage(buffer, 800);
+
         const stream = cloudinary.uploader.upload_stream(
             { 
                 folder: subFolder ? `${cloudinaryFolder}/${subFolder}` : cloudinaryFolder,
@@ -26,6 +30,6 @@ export const uploadBufferToCloudinary = async (
             }
         );
         
-        stream.end(buffer);
+        stream.end(resizeImg);
     });
 }
