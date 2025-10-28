@@ -1,7 +1,8 @@
 import { prisma } from '@config/prismaClient';
 import type { Profile } from '../types/schema_type'
-import { deleteFileFromS3 } from '@awsServices/images/deleteImageService';
-import { uploadFileToS3 } from '@awsServices/images/uploadImageService';
+import { uploadBufferToCloudinary } from '@services/upload/uploadService';
+import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
+import { upload } from '@middleware/uploadMiddleware';
 
 // GET profile by user ID
 export const getProfileService = async (userId: number) => {
@@ -14,10 +15,15 @@ export const getProfileService = async (userId: number) => {
 // POST create a new profile
 export const createProfileService = async (profileData: Profile, files: Express.Multer.File[]) => {
     let finalImageUrl = '';
+    let finalPublicId = '';
 
     if (files.length > 0) {
-        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
-        finalImageUrl = uploadResults[0] ?? '';
+        const uploadResults = await Promise.all(files.map(
+            file => uploadBufferToCloudinary(file.buffer, 'profiles'))
+        );
+        const uploaded = uploadResults[0];
+        finalImageUrl = uploaded?.secure_url ?? '';
+        finalPublicId = uploaded?.public_id ?? '';
     }
     
     return prisma.profile.create({
@@ -28,6 +34,7 @@ export const createProfileService = async (profileData: Profile, files: Express.
                 ? { create:
                     {
                         url: finalImageUrl,
+                        publicId: finalPublicId,
                         createdAt: new Date(),
                         updatedAt: new Date(),
                     }
@@ -40,7 +47,7 @@ export const createProfileService = async (profileData: Profile, files: Express.
 };
 
 // PATCH update a profile by user ID
-export const updateProfileService = async (userId: number, data: Partial<Profile>, files: Express.Multer.File[]) => {
+export const updateProfileService = async (userId: number, data: Partial<Profile>, files: Express.Multer.File[], imageUrl?: string) => {
     const existingProfile = await prisma.profile.findUnique({
         where: { userId: userId },
         include: { image: true },
@@ -51,16 +58,23 @@ export const updateProfileService = async (userId: number, data: Partial<Profile
     }
 
     let finalImageUrl = '';
+    let finalPublicId = '';
 
     if (files.length > 0) {
-        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
-        finalImageUrl = uploadResults[0] ?? '';
+        const uploadResults = await Promise.all(
+            files.map(file => uploadBufferToCloudinary(file.buffer, 'profiles'))
+        );
+        const uploaded = uploadResults[0];
+        finalImageUrl = uploaded?.secure_url ?? '';
+        finalPublicId = uploaded?.public_id ?? '';
+
+        if (finalPublicId && existingProfile?.image?.publicId && existingProfile.image.publicId !== finalPublicId) {
+            await deleteCloudinaryByPublicId(existingProfile.image.publicId);
+        }
+    } else if (imageUrl) {
+        finalImageUrl = imageUrl.trim();
     }
 
-    if (finalImageUrl && existingProfile?.image?.url && existingProfile.image.url !== finalImageUrl) {
-        await deleteFileFromS3(existingProfile.image.url);
-    }
-        
     return prisma.profile.update({
         where: { userId: userId },
         data: {
@@ -70,11 +84,13 @@ export const updateProfileService = async (userId: number, data: Partial<Profile
                     upsert: {
                         create: {
                             url: finalImageUrl,
+                            publicId: finalPublicId,
                             createdAt: new Date(),
                             updatedAt: new Date(),
                         },
                         update: {
                             url: finalImageUrl,
+                            publicId: finalPublicId,
                             updatedAt: new Date(),
                         }
                     }
@@ -96,8 +112,8 @@ export const deleteProfileService = async (profileId: number) => {
         throw new Error('Profile not found');
     }
 
-    if (existingProfile?.image?.url) {
-        await deleteFileFromS3(existingProfile.image.url);
+    if (existingProfile?.image?.publicId) {
+        await deleteCloudinaryByPublicId(existingProfile.image.publicId);
     }
 
     return await prisma.profile.delete({
