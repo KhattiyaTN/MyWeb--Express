@@ -1,7 +1,7 @@
 import { prisma } from '@config/prismaClient';
 import type { Badge } from '../types/schema_type';
-import { deleteFileFromS3 } from '@awsServices/images/deleteImageService';
-import { uploadFileToS3 } from '@awsServices/images/uploadImageService';
+import { uploadBufferToCloudinary } from '@services/upload/uploadService';
+import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
 
 // GET badges by user ID
 export const getAllBadgesService = async (userId: number) => {
@@ -15,10 +15,16 @@ export const getAllBadgesService = async (userId: number) => {
 // POST create a new badge
 export const createBadgeService = async (badgeData: Badge, files: Express.Multer.File[]) => {
     let finalImageUrl = '';
+    let finalPublicId = '';
 
     if (files.length > 0) {
-        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
-        finalImageUrl = uploadResults[0] ?? '';
+        const uploadResults = await Promise.all(
+            files.map(file => uploadBufferToCloudinary(file.buffer, 'badges'))
+        );
+
+        const uploaded = uploadResults[0];
+        finalImageUrl = uploaded?.secure_url ?? '';
+        finalPublicId = uploaded?.public_id ?? '';
     }
 
     return await prisma.badge.create({
@@ -28,7 +34,8 @@ export const createBadgeService = async (badgeData: Badge, files: Express.Multer
             image: finalImageUrl 
                 ? { create: 
                     { 
-                        url: finalImageUrl, 
+                        url: finalImageUrl,
+                        publicId: finalPublicId,
                         createdAt: new Date(), 
                         updatedAt: new Date() 
                     } 
@@ -51,17 +58,23 @@ export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, 
         throw new Error('Badge not found');
     }
 
-    let finalImageUrl = '';
+    let finalImageUrl = existingBadge.image?.url || '';
+    let finalPublicId = existingBadge.image?.publicId || '';
 
     if (files.length > 0) {
-        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
-        finalImageUrl = uploadResults[0] ?? '';
+        const uploadResults = await Promise.all(
+            files.map(file => uploadBufferToCloudinary(file.buffer, 'badges'))
+        );
+
+        const uploaded = uploadResults[0];
+        finalImageUrl = uploaded?.secure_url ?? '';
+        finalPublicId = uploaded?.public_id ?? '';
+
+        if (existingBadge.image?.publicId && existingBadge.image.publicId !== finalPublicId) {
+            await deleteCloudinaryByPublicId(existingBadge.image.publicId);
+        }
     } else if (imageUrl?.trim()) {
         finalImageUrl = imageUrl.trim();
-    }
-
-    if (finalImageUrl && existingBadge.image?.url && existingBadge.image.url !== finalImageUrl) {
-        await deleteFileFromS3(existingBadge.image.url);
     }
 
     return await prisma.badge.update({
@@ -72,12 +85,14 @@ export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, 
                 ? {
                     upsert: {
                         create: { 
-                            url: finalImageUrl, 
+                            url: finalImageUrl,
+                            publicId: finalPublicId,
                             createdAt: new Date(), 
                             updatedAt: new Date() 
                         },
                         update: { 
                             url: finalImageUrl, 
+                            publicId: finalPublicId,
                             updatedAt: new Date() 
                         },
                     },
@@ -99,8 +114,8 @@ export const deleteBadgeService = async (badgeId: number) => {
         throw new Error('Badge not found');
     }
 
-    if (existingBadge?.image?.url) {
-        await deleteFileFromS3(existingBadge.image.url);
+    if (existingBadge?.image?.publicId) {
+        await deleteCloudinaryByPublicId(existingBadge.image.publicId);
     }
 
     return await prisma.badge.delete({

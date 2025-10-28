@@ -25,6 +25,7 @@ export const uploadBufferToCloudinary = async (
                 }
             }
         );
+        
         stream.end(buffer);
     });
 }

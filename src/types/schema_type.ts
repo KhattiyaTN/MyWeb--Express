@@ -29,6 +29,7 @@ export interface Certificate {
 
 export interface Badge {
     name: string;
+    publicId: string;
     createdAt: Date;
     updatedAt: Date;
     // Foreign key to User

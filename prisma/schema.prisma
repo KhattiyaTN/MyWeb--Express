@@ -17,6 +17,7 @@ model User {
   password       String
   updatedAt      DateTime        @updatedAt
   emailVerified  DateTime?
+
   accounts       Account[]
   badges         Badge[]
   certifications Certification[]
@@ -31,7 +32,9 @@ model Contract {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   userId    Int      @unique
+
   user      User     @relation(fields: [userId], references: [id])
   image     Image?
 }
@@ -43,7 +46,9 @@ model Certification {
   licenseNo String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   userId    Int
+
   user      User     @relation(fields: [userId], references: [id])
   image     Image?
 
@@ -55,7 +60,9 @@ model Badge {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   userId    Int
+
   user      User     @relation(fields: [userId], references: [id])
   image     Image?
 
@@ -68,7 +75,9 @@ model Project {
   description String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
   userId      Int
+
   images      Image[]
   user        User     @relation(fields: [userId], references: [id])
 
@@ -80,7 +89,9 @@ model Profile {
   bio       String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   userId    Int      @unique
+
   image     Image?
   user      User     @relation(fields: [userId], references: [id])
 }
@@ -88,14 +99,17 @@ model Profile {
 model Image {
   id              Int            @id @default(autoincrement())
   url             String
+  publicId        String?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+
   projectId       Int?
   badgeId         Int?           @unique
   certificationId Int?           @unique
   profileId       Int?           @unique
   contractId      Int?           @unique
   userId          Int?           @unique
+
   badge           Badge?         @relation(fields: [badgeId], references: [id])
   certification   Certification? @relation(fields: [certificationId], references: [id])
   contract        Contract?      @relation(fields: [contractId], references: [id])
@@ -107,7 +121,6 @@ model Image {
 
 model Account {
   id                Int     @id @default(autoincrement())
-  userId            Int
   type              String
   provider          String
   providerAccountId String
@@ -118,6 +131,9 @@ model Account {
   token_type        String?
   id_token          String?
   session_state     String?
+
+  userId            Int
+
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
@@ -126,7 +142,6 @@ model Account {
 
 model RefreshToken {
   id         Int       @id @default(autoincrement())
-  userId     Int
   tokenHash  String    @unique
   expiresAt  DateTime
   createdAt  DateTime  @default(now())
@@ -134,6 +149,9 @@ model RefreshToken {
   replacedBy String?
   ipAddress  String?
   userAgent  String?
+
+  userId     Int
+
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "RefreshToken_userId_fkey")
