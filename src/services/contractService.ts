@@ -1,9 +1,9 @@
 import { prisma } from '@config/prismaClient';
 import type { Contract } from '../types/schema_type'
-import { deleteFileFromS3 } from '@awsServices/images/deleteImageService';
-import { uploadFileToS3 } from '@awsServices/images/uploadImageService';
+import { uploadBufferToCloudinary } from '@services/upload/uploadService';
+import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
 
-// GET contract service
+// GET contract by user ID
 export const getContractService = async (userId: number) => {
     return await prisma.contract.findMany({
         where: { userId: userId },
@@ -15,10 +15,15 @@ export const getContractService = async (userId: number) => {
 // POST create contract service
 export const createContractService = async (contract: Contract,  files: Express.Multer.File[]) => {
     let finalImageUrl = '';
+    let finalPublicId = '';
 
     if (files.length > 0) {
-        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
-        finalImageUrl = uploadResults[0] ?? '';
+        const uploadResults = await Promise.all(
+            files.map(file => uploadBufferToCloudinary(file.buffer, 'contracts'))
+        );
+        const uploaded = uploadResults[0];
+        finalImageUrl = uploaded?.secure_url ?? '';
+        finalPublicId = uploaded?.public_id ?? '';
     }
     
     return await prisma.contract.create({
@@ -29,6 +34,7 @@ export const createContractService = async (contract: Contract,  files: Express.
                 ? { create: 
                     {
                         url: finalImageUrl,
+                        publicId: finalPublicId,
                         createdAt: new Date(),
                         updatedAt: new Date(),
                     }
@@ -41,7 +47,7 @@ export const createContractService = async (contract: Contract,  files: Express.
 };
 
 // PATCH update contract service
-export const updateContractService = async (id: number, data: Partial<Contract>, files: Express.Multer.File[]) => {
+export const updateContractService = async (id: number, data: Partial<Contract>, files: Express.Multer.File[], imageUrl?: string) => {
     const existingContract = await prisma.contract.findUnique({ 
         where: { id },
         include: { image: true },
@@ -52,14 +58,21 @@ export const updateContractService = async (id: number, data: Partial<Contract>,
     }
 
     let finalImageUrl = '';
+    let finalPublicId = '';
 
     if (files.length > 0) {
-        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
-        finalImageUrl = uploadResults[0] ?? '';
-    }
+        const uploadResults = await Promise.all(files.map(
+            file => uploadBufferToCloudinary(file.buffer, 'contracts'))
+        );
+        const uploaded = uploadResults[0];
+        finalImageUrl = uploaded?.secure_url ?? '';
+        finalPublicId = uploaded?.public_id ?? '';
 
-    if (finalImageUrl && existingContract?.image?.url && existingContract.image.url !== finalImageUrl) {
-        await deleteFileFromS3(existingContract.image.url);
+        if (finalPublicId && existingContract?.image?.publicId && existingContract.image.publicId !== finalPublicId) {
+            await deleteCloudinaryByPublicId(existingContract.image.publicId);
+        }
+    } else if (imageUrl) {
+        finalImageUrl = imageUrl.trim();
     }
 
     return await prisma.contract.update({
@@ -71,11 +84,13 @@ export const updateContractService = async (id: number, data: Partial<Contract>,
                     upsert: {
                         create: {
                             url: finalImageUrl,
+                            publicId: finalPublicId,
                             createdAt: new Date(),
                             updatedAt: new Date(),
                         },
                         update: {
                             url: finalImageUrl,
+                            publicId: finalPublicId,
                             updatedAt: new Date(),
                         }
                     }
@@ -97,8 +112,8 @@ export const deleteContractService = async (contractId: number) => {
         throw new Error('Contract not found');
     }
 
-    if (existingContract?.image?.url) {
-        await deleteFileFromS3(existingContract.image.url);
+    if (existingContract?.image?.publicId) {
+        await deleteCloudinaryByPublicId(existingContract.image.publicId);
     }
 
     return await prisma.contract.delete({
