@@ -1,9 +1,9 @@
 import { prisma } from '@config/prismaClient';
 import type { Certificate } from "../types/schema_type"
-import { deleteFileFromS3 } from '@awsServices/images/deleteImageService';
-import { uploadFileToS3 } from '@awsServices/images/uploadImageService';
+import { uploadBufferToCloudinary } from '@services/upload/uploadService';
+import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
 
-// GET certs service
+// GET certs by user ID
 export const getCertService = async (userId: number) => {
     return await prisma.certification.findMany({
         where: { userId: userId },
@@ -15,10 +15,15 @@ export const getCertService = async (userId: number) => {
 // POST add cert service
 export const addCertService = async (certData: Certificate, files: Express.Multer.File[]) => {
     let finalImageUrl = '';
+    let finalPublicId = '';
 
     if (files.length > 0) {
-        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
-        finalImageUrl = uploadResults[0] ?? '';
+        const uploadResults = await Promise.all(
+            files.map(file => uploadBufferToCloudinary(file.buffer, 'certifications'))
+        );
+        const uploaded = uploadResults[0];
+        finalImageUrl = uploaded?.secure_url ?? '';
+        finalPublicId = uploaded?.public_id ?? '';
     }
 
     return await prisma.certification.create({
@@ -31,6 +36,7 @@ export const addCertService = async (certData: Certificate, files: Express.Multe
                 ? { create:
                     {
                         url: finalImageUrl,
+                        publicId: finalPublicId,
                         createdAt: new Date(),
                         updatedAt: new Date(),
                     }
@@ -43,7 +49,7 @@ export const addCertService = async (certData: Certificate, files: Express.Multe
 };
 
 // PATCH update cert service
-export const updateCertService = async (id: number, data: Partial<Certificate>, files: Express.Multer.File[]) => {
+export const updateCertService = async (id: number, data: Partial<Certificate>, files: Express.Multer.File[], imageUrl?: string) => {
     const existingCert = await prisma.certification.findUnique({
         where: { id: id },
         include: { image: true },
@@ -54,16 +60,24 @@ export const updateCertService = async (id: number, data: Partial<Certificate>, 
     }
 
     let finalImageUrl = '';
-    
+    let finalPublicId = '';
+
     if (files.length > 0) {
-        const uploadResults = await Promise.all(files.map(file => uploadFileToS3(file)));
-        finalImageUrl = uploadResults[0] ?? '';
+        const uploadResults = await Promise.all(
+            files.map(file => uploadBufferToCloudinary(file.buffer, 'certifications'))
+        );
+
+        const uploaded = uploadResults[0];
+        finalImageUrl = uploaded?.secure_url ?? '';
+        finalPublicId = uploaded?.public_id ?? '';
+
+        if (existingCert.image?.publicId && existingCert.image.publicId !== finalPublicId) {
+            await deleteCloudinaryByPublicId(existingCert.image.publicId);
+        }
+    } else if (imageUrl?.trim()) {
+        finalImageUrl = imageUrl.trim();
     }
 
-    if (finalImageUrl && existingCert?.image?.url && existingCert.image.url !== finalImageUrl) {
-        await deleteFileFromS3(existingCert.image.url);
-    }
-    
     return await prisma.certification.update({
         where: { id: id },
         data: {
@@ -75,11 +89,13 @@ export const updateCertService = async (id: number, data: Partial<Certificate>, 
                     upsert: {
                         create: {
                             url: finalImageUrl,
+                            publicId: finalPublicId,
                             createdAt: new Date(),
                             updatedAt: new Date(),
                         },
                         update: {
                             url: finalImageUrl,
+                            publicId: finalPublicId,
                             updatedAt: new Date(),
                         }
                     }
@@ -101,8 +117,8 @@ export const deleteCertService = async (certId: number) => {
         throw new Error('Certificate not found');
     }
 
-    if (existingCert?.image?.url) {
-        await deleteFileFromS3(existingCert.image.url);
+    if (existingCert?.image?.publicId) {
+        await deleteCloudinaryByPublicId(existingCert.image.publicId);
     }
 
     return await prisma.certification.delete({

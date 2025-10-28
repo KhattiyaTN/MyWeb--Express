@@ -21,7 +21,6 @@ export const createBadgeService = async (badgeData: Badge, files: Express.Multer
         const uploadResults = await Promise.all(
             files.map(file => uploadBufferToCloudinary(file.buffer, 'badges'))
         );
-
         const uploaded = uploadResults[0];
         finalImageUrl = uploaded?.secure_url ?? '';
         finalPublicId = uploaded?.public_id ?? '';

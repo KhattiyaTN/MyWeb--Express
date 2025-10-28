@@ -4,8 +4,12 @@ import { getCertService, addCertService, updateCertService, deleteCertService } 
 // GET
 export const getCerts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        if (!req.user || typeof req.user.id !== 'number') {
-            return res.status(400).json({ message: 'User not authenticated or ID missing' });
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        if (typeof req.user.id !== 'number') {
+            return res.status(400).json({ message: 'User ID is missing or invalid' });
         }
         
         const id = req.user.id;
@@ -29,7 +33,7 @@ export const createCert = async (req: Request, res: Response, next: NextFunction
         const certFiles = req.files as Express.Multer.File[] || [];
 
         if (!certFiles.length) {
-            return res.status(400).json({ message: 'Image file or imageUrl is required' });
+            return res.status(400).json({ message: 'Image file is required' });
         }
 
         const newCert = await addCertService(certData, certFiles);
@@ -42,11 +46,9 @@ export const createCert = async (req: Request, res: Response, next: NextFunction
 // PATCH
 export const updateCert = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = req.params;
-        const certId = Number(id);
+        const certId = Number(req.params.id);
         const data = req.body;
         const certFiles = req.files as Express.Multer.File[] || [];
-
 
         if (isNaN(certId)) {
             return res.status(400).json({ message: 'Invalid certificate ID' });
@@ -71,6 +73,7 @@ export const deleteCert = async (req: Request, res: Response, next: NextFunction
         }
 
         await deleteCertService(certId);
+        
         res.status(204).send();
     } catch (error) {
         next(error);

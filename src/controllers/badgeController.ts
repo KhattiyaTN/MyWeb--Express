@@ -4,8 +4,12 @@ import { getAllBadgesService, createBadgeService, updateBadgeService, deleteBadg
 // GET
 export const getBadges = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        if (!req.user || typeof req.user.id !== 'number') {
+        if (!req.user) {
             return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        if (typeof req.user.id !== 'number') {
+            return res.status(400).json({ message: 'User ID is missing or invalid' });
         }
 
         const id = req.user.id;
@@ -52,6 +56,7 @@ export const updateBadge = async (req: Request, res: Response, next: NextFunctio
         }
 
         const updatedBadge = await updateBadgeService(badgeId, data, badgeFiles);
+        
         res.status(200).json(updatedBadge);
     } catch (error) {
         next(error);
