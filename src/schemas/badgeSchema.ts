@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-// Params ID Schema
+// Badge Params ID Schema
 export const badgeIdParamSchema = z.object({
     params: z.object({
         id: z
