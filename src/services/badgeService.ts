@@ -14,16 +14,15 @@ export const getAllBadgesService = async (userId: number) => {
 
 // POST create a new badge
 export const createBadgeService = async (badgeData: Badge, files: Express.Multer.File[]) => {
-    let finalImageUrl = '';
-    let finalPublicId = '';
+    let finalImageUrl: string | undefined;
+    let finalPublicId: string | undefined;
 
-    if (files.length > 0) {
-        const uploadResults = await Promise.all(
-            files.map(file => uploadBufferToCloudinary(file.buffer, 'badges'))
-        );
-        const uploaded = uploadResults[0];
-        finalImageUrl = uploaded?.secure_url ?? '';
-        finalPublicId = uploaded?.public_id ?? '';
+    const file = files?.[0];
+
+    if (file?.buffer) {
+        const uploadResult = await uploadBufferToCloudinary(file.buffer, 'badges');
+        finalImageUrl = uploadResult?.secure_url ?? '';
+        finalPublicId = uploadResult?.public_id ?? '';
     }
 
     return await prisma.badge.create({
@@ -57,17 +56,15 @@ export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, 
         throw new Error('Badge not found');
     }
 
-    let finalImageUrl = existingBadge.image?.url || '';
-    let finalPublicId = existingBadge.image?.publicId || '';
+    let finalImageUrl: string | undefined;
+    let finalPublicId: string | undefined;
 
-    if (files.length > 0) {
-        const uploadResults = await Promise.all(
-            files.map(file => uploadBufferToCloudinary(file.buffer, 'badges'))
-        );
-
-        const uploaded = uploadResults[0];
-        finalImageUrl = uploaded?.secure_url ?? '';
-        finalPublicId = uploaded?.public_id ?? '';
+    const file = files?.[0]
+    
+    if (file?.buffer) {
+        const uploadResult = await uploadBufferToCloudinary(file.buffer, 'badges');
+        finalImageUrl = uploadResult?.secure_url ?? '';
+        finalPublicId = uploadResult?.public_id ?? '';
 
         if (existingBadge.image?.publicId && existingBadge.image.publicId !== finalPublicId) {
             await deleteCloudinaryByPublicId(existingBadge.image.publicId);
@@ -86,17 +83,13 @@ export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, 
                         create: { 
                             url: finalImageUrl,
                             publicId: finalPublicId,
-                            createdAt: new Date(), 
-                            updatedAt: new Date() 
                         },
                         update: { 
                             url: finalImageUrl, 
                             publicId: finalPublicId,
-                            updatedAt: new Date() 
                         },
                     },
                 } : undefined,
-            updatedAt: new Date(),
         },
         include: { image: true },
     });
