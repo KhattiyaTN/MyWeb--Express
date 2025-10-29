@@ -61,12 +61,8 @@ export const createProjectService = async (projectData: Project, files: Express.
                         { 
                             url: img.url, 
                             publicId: img.publicId,
-                            createdAt: new Date(), 
-                            updatedAt: new Date() 
                         })),
                 }: undefined,
-            createdAt: new Date(),
-            updatedAt: new Date(),
         },
         include: { images: true },
     });
@@ -131,11 +127,8 @@ export const updateProjectService = async (id: number, data: Partial<Project>, i
                     create: successfulUploads.map(img => ({
                         url: img.url,
                         publicId: img.publicId,
-                        createdAt: new Date(),
-                        updatedAt: new Date()
                     }))
                 } : undefined,
-            updatedAt: new Date(),
         },
         include: { images: true }
     });
