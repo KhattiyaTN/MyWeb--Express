@@ -5,11 +5,32 @@ import { logoutUser } from '@controllers/auth/logoutController';
 import { refreshToken } from '@controllers/auth/refreshTokenController';
 import { loginLimiter, refreshLimiter } from '@config/rateLimit';
 
+import { validateMiddleware } from '@middleware/validateMiddleware';
+import { loginSchema, registerSchema, logoutSchema, refreshSchema } from '@schemas/auth/authSchema';
+
 const router = Router();
 
-router.post('/register', registerUser);
-router.post('/login', loginLimiter, loginUser);
-router.post('/logout', logoutUser);
-router.post('/refresh', refreshLimiter, refreshToken);
+router.post(
+    '/register', 
+    validateMiddleware(registerSchema), 
+    registerUser
+);
+router.post(
+    '/login', 
+    loginLimiter, 
+    validateMiddleware(loginSchema), 
+    loginUser
+);
+router.post(
+    '/logout', 
+    validateMiddleware(logoutSchema), 
+    logoutUser
+);
+router.post(
+    '/refresh', 
+    refreshLimiter, 
+    validateMiddleware(refreshSchema), 
+    refreshToken
+);
 
 export default router;
