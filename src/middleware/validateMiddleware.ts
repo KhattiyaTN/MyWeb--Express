@@ -16,16 +16,16 @@ export const validateMiddleware = (schema: SafeSchema) => (req: Request, res: Re
 
     if (!result.success) {
         const errors = result.error.issues.map((i) => ({
-            path: i.path,
+            path: i.path.join('.'),
             message: i.message,
         }));
         return res.status(400).json({ message: 'Validation error', errors });
     }
 
-    const { body, query, params } = result.data;
+    const { body, query, params } = result.data ?? {};
     if (body) req.body = body;
     if (query) req.query = query;
     if (params) req.params = params;
 
-    next();
+    return next();
 };

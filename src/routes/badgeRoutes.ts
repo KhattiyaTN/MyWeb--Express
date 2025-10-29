@@ -3,7 +3,7 @@ import { upload } from '@middleware/uploadMiddleware';
 import { getBadges, createBadge, updateBadge, deleteBadge } from '@controllers/badgeController';
 
 import { validateMiddleware } from '@middleware/validateMiddleware';
-import { createBadgeSchema, updateBadgeSchema } from '@schemas/badgeSchema';
+import { createBadgeSchema, updateBadgeSchema, badgeIdParamSchema } from '@schemas/badgeSchema';
 
 const router = Router();
 
@@ -32,6 +32,7 @@ router.patch(
 // DELETE
 router.delete(
     '/:id', 
+    validateMiddleware(badgeIdParamSchema), 
     deleteBadge
 );
 

@@ -1,5 +1,16 @@
 import { z } from 'zod';
 
+// Params ID Schema
+export const badgeIdParamSchema = z.object({
+    params: z.object({
+        id: z
+            .coerce
+            .number()
+            .int('Badge ID must be an integer')
+            .positive('Badge ID must be a positive number'),
+    }).strict()
+})
+
 // Create Badge Schema
 export const createBadgeSchema = z.object({
     body: z.object({
@@ -16,6 +27,13 @@ export const createBadgeSchema = z.object({
 
 // Update Badge Schema
 export const updateBadgeSchema = z.object({
+    params: z.object({
+        id: z
+            .coerce
+            .number()
+            .int('Badge ID must be an integer')
+            .positive('Badge ID must be a positive number'),
+    }).strict(),
     body: z.object({
         name: z
             .string()
@@ -32,3 +50,4 @@ export const updateBadgeSchema = z.object({
 // Types
 export type CreateBadgeInput = z.infer<typeof createBadgeSchema>;
 export type UpdateBadgeInput = z.infer<typeof updateBadgeSchema>;
+export type BadgeIdParams = z.infer<typeof badgeIdParamSchema>;
