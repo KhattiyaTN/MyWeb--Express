@@ -14,14 +14,13 @@ export const getCertService = async (userId: number) => {
 
 // POST add cert service
 export const addCertService = async (certData: Certificate, files: Express.Multer.File[]) => {
-    let finalImageUrl = '';
-    let finalPublicId = '';
+    let finalImageUrl: string | undefined;
+    let finalPublicId: string | undefined;
 
-    if (files.length > 0) {
-        const uploadResults = await Promise.all(
-            files.map(file => uploadBufferToCloudinary(file.buffer, 'certifications'))
-        );
-        const uploaded = uploadResults[0];
+    const file = files?.[0];
+
+    if (file?.buffer) {
+        const uploaded = await uploadBufferToCloudinary(file.buffer, 'certifications');
         finalImageUrl = uploaded?.secure_url ?? '';
         finalPublicId = uploaded?.public_id ?? '';
     }
@@ -37,12 +36,8 @@ export const addCertService = async (certData: Certificate, files: Express.Multe
                     {
                         url: finalImageUrl,
                         publicId: finalPublicId,
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
                     }
                 } : undefined,
-            createdAt: new Date(),
-            updatedAt: new Date(),
         },
         include: { image: true },
     });
@@ -59,15 +54,13 @@ export const updateCertService = async (id: number, data: Partial<Certificate>, 
         throw new Error('Certificate not found');
     }
 
-    let finalImageUrl = '';
-    let finalPublicId = '';
+    let finalImageUrl: string | undefined;
+    let finalPublicId: string | undefined;
 
-    if (files.length > 0) {
-        const uploadResults = await Promise.all(
-            files.map(file => uploadBufferToCloudinary(file.buffer, 'certifications'))
-        );
+    const file = files?.[0];
 
-        const uploaded = uploadResults[0];
+    if (file?.buffer) {
+        const uploaded = await uploadBufferToCloudinary(file.buffer, 'certifications');
         finalImageUrl = uploaded?.secure_url ?? '';
         finalPublicId = uploaded?.public_id ?? '';
 
@@ -81,26 +74,22 @@ export const updateCertService = async (id: number, data: Partial<Certificate>, 
     return await prisma.certification.update({
         where: { id: id },
         data: {
-            name: data.name,
-            authority: data.authority,
-            licenseNo: data.licenseNo,
+            name: data.name ?? existingCert.name,
+            authority: data.authority ?? existingCert.authority,
+            licenseNo: data.licenseNo ?? existingCert.licenseNo,
             image: finalImageUrl
                 ? {
                     upsert: {
                         create: {
                             url: finalImageUrl,
                             publicId: finalPublicId,
-                            createdAt: new Date(),
-                            updatedAt: new Date(),
                         },
                         update: {
                             url: finalImageUrl,
                             publicId: finalPublicId,
-                            updatedAt: new Date(),
                         }
                     }
                 } : undefined,
-            updatedAt: new Date(),
         },
         include: { image: true },
     })
