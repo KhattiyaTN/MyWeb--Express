@@ -9,9 +9,9 @@ export const uploadBufferToCloudinary = async (
     subFolder?: string, 
     options: UploadApiOptions = {}
 ) => {
-    return new Promise<UploadApiResponse>((resolve, reject) => {
+    return new Promise<UploadApiResponse>(async (resolve, reject) => {
         
-        const resizeImg = resizeImage(buffer, 800);
+        const resizeImg = await resizeImage(buffer, 800);
 
         const stream = cloudinary.uploader.upload_stream(
             { 
