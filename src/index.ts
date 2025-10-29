@@ -1,7 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import morgan from 'morgan';
 import { limiter } from '@config/rateLimit';
 import { errorHandler } from '@config/errorHandler';
@@ -15,8 +14,6 @@ import badgeRoutes from '@routes/badgeRoutes';
 import profileRoutes from '@routes/profileRoutes';
 import projectRoutes from '@routes/projectRoutes';
 import contractRoutes from '@routes/contractRoutes';
-
-dotenv.config();
 
 const app = express();
 const trust = process.env.TRUST_PROXY;

@@ -1,43 +1,40 @@
 {
   "name": "back-end",
   "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "dev": "nodemon --watch src --exec bun run src/index.ts"
-  },
-  "devDependencies": {
-    "@types/aws-sdk": "^2.7.4",
-    "@types/bcrypt": "^6.0.0",
-    "@types/bun": "latest",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.5",
-    "@types/multer": "^2.0.0",
-    "@types/node": "^24.5.2",
-    "bcrypt": "^6.0.0",
-    "multer": "^2.0.2",
-    "nodemon": "^3.1.10",
-    "sharp": "^0.34.4",
-    "tsx": "^4.20.5"
-  },
-  "peerDependencies": {
-    "typescript": "^5.9.2"
-  },
   "dependencies": {
-    "@prisma/client": "^6.16.2",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/morgan": "^1.9.10",
-    "aws-sdk": "^2.1692.0",
+    "@prisma/client": "^6.18.0",
+    "bcrypt": "^6.0.0",
     "cloudinary": "^2.8.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "express-rate-limit": "^8.1.0",
+    "express-rate-limit": "^8",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
+    "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
-    "prisma": "^6.16.2",
+    "sharp": "^0.34.4",
     "zod": "3.23.8"
-  }
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/bun": "latest",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.5.2",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.18.0",
+    "typescript": "^5.9.3"
+  },
+  "private": true,
+  "scripts": {
+    "dev": "nodemon --watch src --ext ts,tsx,json --exec \"bun run src/index.ts\"",
+    "start": "NODE_ENV=production bun run src/index.ts",
+    "postinstall": "prisma generate"
+  },
+  "type": "module"
 }

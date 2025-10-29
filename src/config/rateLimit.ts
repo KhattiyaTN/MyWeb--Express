@@ -1,4 +1,7 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator as erlIpKeyGen } from 'express-rate-limit';
+import type { Request } from 'express';
+
+const safeIpKey = (req: Request) => (erlIpKeyGen as unknown as (r: Request) => string)(req);
 
 // General rate limiter
 export const limiter = rateLimit({
@@ -19,7 +22,7 @@ export const loginLimiter = rateLimit({
     legacyHeaders: false,
     skipSuccessfulRequests: true,
     keyGenerator: (req, _res) => {
-        const ip = req.ip || '';
+        const ip = safeIpKey(req);
         const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
         return `${ip}-${email}`;
     },
@@ -34,9 +37,7 @@ export const refreshLimiter = rateLimit({
     max: 30,
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator: (req, _res) => {
-        return req.ip || 'unknown';
-    },
+    keyGenerator: (req) => safeIpKey(req),
     handler: (_req, res) => {
         res.status(429).json({ message: 'Too many token refresh attempts, please try again after 5 minutes' });
     },
