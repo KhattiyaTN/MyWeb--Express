@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
-import type { User } from "../types/schema_type"
+import { prisma } from '@config/prismaClient';
+import type { User } from "@prisma/client"
 import { hashPassword } from '@utils/hashedPassword';
-
-const prisma = new PrismaClient();
 
 // GET user service
 export const getUsersService = async (userId: number) => {

@@ -1,5 +1,5 @@
 import { prisma } from '@config/prismaClient';
-import type { Certificate } from "../types/schema_type"
+import type { Certification } from "@prisma/client"
 import { uploadBufferToCloudinary } from '@services/upload/uploadService';
 import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
 
@@ -13,7 +13,7 @@ export const getCertService = async (userId: number) => {
 }
 
 // POST add cert service
-export const addCertService = async (certData: Certificate, files: Express.Multer.File[]) => {
+export const addCertService = async (certData: Certification, files: Express.Multer.File[]) => {
     let finalImageUrl: string | undefined;
     let finalPublicId: string | undefined;
 
@@ -44,7 +44,7 @@ export const addCertService = async (certData: Certificate, files: Express.Multe
 };
 
 // PATCH update cert service
-export const updateCertService = async (id: number, data: Partial<Certificate>, files: Express.Multer.File[], imageUrl?: string) => {
+export const updateCertService = async (id: number, data: Partial<Certification>, files: Express.Multer.File[], imageUrl?: string) => {
     const existingCert = await prisma.certification.findUnique({
         where: { id: id },
         include: { image: true },

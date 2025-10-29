@@ -1,5 +1,5 @@
 import { prisma } from '@config/prismaClient';
-import type { Badge } from '../types/schema_type';
+import type { Badge } from '@prisma/client';
 import { uploadBufferToCloudinary } from '@services/upload/uploadService';
 import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
 

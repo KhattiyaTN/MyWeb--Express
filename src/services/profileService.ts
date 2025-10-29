@@ -1,5 +1,5 @@
 import { prisma } from '@config/prismaClient';
-import type { Profile } from '../types/schema_type'
+import type { Profile } from '@prisma/client';
 import { uploadBufferToCloudinary } from '@services/upload/uploadService';
 import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
 import { upload } from '@middleware/uploadMiddleware';
