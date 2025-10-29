@@ -14,16 +14,15 @@ export const getProfileService = async (userId: number) => {
 
 // POST create a new profile
 export const createProfileService = async (profileData: Profile, files: Express.Multer.File[]) => {
-    let finalImageUrl = '';
-    let finalPublicId = '';
+    let finalImageUrl: string | undefined;
+    let finalPublicId: string | undefined;
 
-    if (files.length > 0) {
-        const uploadResults = await Promise.all(files.map(
-            file => uploadBufferToCloudinary(file.buffer, 'profiles'))
-        );
-        const uploaded = uploadResults[0];
-        finalImageUrl = uploaded?.secure_url ?? '';
-        finalPublicId = uploaded?.public_id ?? '';
+    const file = files?.[0];
+
+    if (file?.buffer) {
+        const uploadResult = await uploadBufferToCloudinary(file.buffer, 'profiles');
+        finalImageUrl = uploadResult?.secure_url ?? '';
+        finalPublicId = uploadResult?.public_id ?? '';
     }
     
     return prisma.profile.create({
@@ -35,12 +34,8 @@ export const createProfileService = async (profileData: Profile, files: Express.
                     {
                         url: finalImageUrl,
                         publicId: finalPublicId,
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
                     }
                 } : undefined,
-            createdAt: new Date(),
-            updatedAt: new Date(),
         },
         include: { image: true },
     });
@@ -57,21 +52,20 @@ export const updateProfileService = async (userId: number, data: Partial<Profile
         throw new Error('Profile not found');
     }
 
-    let finalImageUrl = '';
-    let finalPublicId = '';
+    let finalImageUrl: string | undefined;
+    let finalPublicId: string | undefined;
 
-    if (files.length > 0) {
-        const uploadResults = await Promise.all(
-            files.map(file => uploadBufferToCloudinary(file.buffer, 'profiles'))
-        );
-        const uploaded = uploadResults[0];
-        finalImageUrl = uploaded?.secure_url ?? '';
-        finalPublicId = uploaded?.public_id ?? '';
+    const file = files?.[0];
+
+    if (file?.buffer) {
+        const uploadResult = await uploadBufferToCloudinary(file.buffer, 'profiles');
+        finalImageUrl = uploadResult?.secure_url ?? '';
+        finalPublicId = uploadResult?.public_id ?? '';
 
         if (finalPublicId && existingProfile?.image?.publicId && existingProfile.image.publicId !== finalPublicId) {
             await deleteCloudinaryByPublicId(existingProfile.image.publicId);
         }
-    } else if (imageUrl) {
+    } else if (imageUrl?.trim()) {
         finalImageUrl = imageUrl.trim();
     }
 
@@ -85,17 +79,13 @@ export const updateProfileService = async (userId: number, data: Partial<Profile
                         create: {
                             url: finalImageUrl,
                             publicId: finalPublicId,
-                            createdAt: new Date(),
-                            updatedAt: new Date(),
                         },
                         update: {
                             url: finalImageUrl,
                             publicId: finalPublicId,
-                            updatedAt: new Date(),
                         }
                     }
                 } : undefined,
-            updatedAt: new Date(),
         },
         include: { image: true },
     });
