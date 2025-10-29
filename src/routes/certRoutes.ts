@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { upload } from '@middleware/uploadMiddleware';
 import { getCerts, createCert, updateCert, deleteCert } from '@controllers/certController';
 
+import { authenticate } from '@middleware/authMiddleware';
+import { upload } from '@middleware/uploadMiddleware';
 import { validateMiddleware } from '@middleware/validateMiddleware';
 import { certIdParamSchema, createCertSchema, updateCertSchema } from '@schemas/certSchema';
 
@@ -15,7 +16,8 @@ router.get(
 
 // POST
 router.post(
-    '/', 
+    '/',
+    authenticate, 
     upload.array('images', 1), 
     validateMiddleware(createCertSchema), 
     createCert
@@ -24,15 +26,17 @@ router.post(
 // PATCH
 router.patch(
     '/:id', 
-    upload.array('images', 1), 
-    validateMiddleware(updateCertSchema), 
+    authenticate,
+    upload.array('images', 1),
+    validateMiddleware(updateCertSchema),
     updateCert
 );
 
 // DELETE
 router.delete(
     '/:id', 
-    validateMiddleware(certIdParamSchema), 
+    authenticate,
+    validateMiddleware(certIdParamSchema),
     deleteCert
 );
 

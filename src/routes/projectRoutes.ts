@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { upload } from '@middleware/uploadMiddleware';
 import { getProjects, createProject, updateProject, deleteProject } from '@controllers/projectController';
 
-import {validateMiddleware} from '@middleware/validateMiddleware';
+import { authenticate } from '@middleware/authMiddleware';
+import { upload } from '@middleware/uploadMiddleware';
+import { validateMiddleware } from '@middleware/validateMiddleware';
 import { createProjectSchema, updateProjectSchema, projectIdParamSchema } from '@schemas/projectSchema';
 
 const router = Router();
@@ -16,6 +17,7 @@ router.get(
 // POST
 router.post(
     '/',
+    authenticate,
     upload.array('images', 10),
     validateMiddleware(createProjectSchema),
     createProject
@@ -24,6 +26,7 @@ router.post(
 // PATCH
 router.patch(
     '/:id',
+    authenticate,
     upload.array('images', 10),
     validateMiddleware(updateProjectSchema),
     updateProject
@@ -32,6 +35,7 @@ router.patch(
 // DELETE
 router.delete(
     '/:id',
+    authenticate,
     validateMiddleware(projectIdParamSchema),
     deleteProject
 );

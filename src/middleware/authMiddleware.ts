@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
 import type { Request, Response, NextFunction } from "express";
+import jwt from 'jsonwebtoken';
 import type { JwtPayload } from '../types/jwt_type';
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
@@ -7,7 +7,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     const [ schema, token ] = authHeader.split(' ');
     const secret = process.env.JWT_SECRET;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ') || schema !== 'Bearer' || !token) {
+    if (!authHeader || schema !== 'Bearer' || !token) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
 
@@ -16,8 +16,8 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     }
 
     try {
-        const payload = jwt.verify(token, secret) as JwtPayload;
-        req.user = payload;
+        const decoded = jwt.verify(token, secret) as JwtPayload;
+        req.user = decoded;
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Invalid or expired token' });

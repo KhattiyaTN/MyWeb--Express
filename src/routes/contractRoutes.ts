@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { upload } from '@middleware/uploadMiddleware';
 import { getContract, createContract, updateContract, deleteContract } from '@controllers/contractController';
 
+import { upload } from '@middleware/uploadMiddleware';
+import { authenticate } from '@middleware/authMiddleware';
 import { validateMiddleware } from '@middleware/validateMiddleware';
 import { contractIdParamSchema, createContractSchema, updateContractSchema } from '@schemas/contractSchema';
 
@@ -16,6 +17,7 @@ router.get(
 // POST
 router.post(
     '/', 
+    authenticate,
     upload.array('images', 1), 
     validateMiddleware(createContractSchema), 
     createContract
@@ -23,16 +25,18 @@ router.post(
 
 // PATCH
 router.patch(
-    '/:id', 
-    upload.array('images', 1), 
-    validateMiddleware(updateContractSchema), 
+    '/:id',
+    authenticate,
+    upload.array('images', 1),
+    validateMiddleware(updateContractSchema),
     updateContract
 );
 
 // DELETE
 router.delete(
-    '/:id', 
-    validateMiddleware(contractIdParamSchema), 
+    '/:id',
+    authenticate,
+    validateMiddleware(contractIdParamSchema),
     deleteContract
 );
 

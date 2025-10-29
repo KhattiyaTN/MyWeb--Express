@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { upload } from '@middleware/uploadMiddleware';
 import { getBadges, createBadge, updateBadge, deleteBadge } from '@controllers/badgeController';
 
+import { authenticate } from '@middleware/authMiddleware';
+import { upload } from '@middleware/uploadMiddleware';
 import { validateMiddleware } from '@middleware/validateMiddleware';
 import { createBadgeSchema, updateBadgeSchema, badgeIdParamSchema } from '@schemas/badgeSchema';
 
@@ -15,7 +16,8 @@ router.get(
 
 // POST
 router.post(
-    '/', 
+    '/',
+    authenticate,
     upload.array('images', 1), 
     validateMiddleware(createBadgeSchema), 
     createBadge
@@ -23,7 +25,8 @@ router.post(
 
 // PATCH
 router.patch(
-    '/:id', 
+    '/:id',
+    authenticate,
     upload.array('images', 1), 
     validateMiddleware(updateBadgeSchema), 
     updateBadge
@@ -31,7 +34,8 @@ router.patch(
 
 // DELETE
 router.delete(
-    '/:id', 
+    '/:id',
+    authenticate,
     validateMiddleware(badgeIdParamSchema), 
     deleteBadge
 );

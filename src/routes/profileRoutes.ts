@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { upload } from '@middleware/uploadMiddleware';
 import { getProfile, createProfile, updateProfile, deleteProfile } from '@controllers/profileController';
 
+import { authenticate } from '@middleware/authMiddleware';
+import { upload } from '@middleware/uploadMiddleware';
 import { validateMiddleware } from '@middleware/validateMiddleware';
 import { profileIdParamSchema, createProfileSchema, updateProfileSchema } from '@schemas/profileSchema';
 
@@ -15,7 +16,8 @@ router.get(
 
 // POST
 router.post(
-    '/', 
+    '/',
+    authenticate,
     upload.array('images', 1), 
     validateMiddleware(createProfileSchema), 
     createProfile
@@ -24,15 +26,17 @@ router.post(
 // PATCH
 router.patch(
     '/:id', 
-    upload.array('images', 1), 
-    validateMiddleware(updateProfileSchema), 
+    authenticate,
+    upload.array('images', 1),
+    validateMiddleware(updateProfileSchema),
     updateProfile
 );
 
 // DELETE
 router.delete(
     '/:id', 
-    validateMiddleware(profileIdParamSchema), 
+    authenticate,
+    validateMiddleware(profileIdParamSchema),
     deleteProfile
 );
 

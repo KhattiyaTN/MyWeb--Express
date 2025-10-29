@@ -2,14 +2,14 @@ import type { Request, Response, NextFunction } from 'express';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import morgan = require('morgan');
+import morgan from 'morgan';
 import { limiter } from '@config/rateLimit';
 import { errorHandler } from '@config/errorHandler';
 import { helmetMiddlewares } from '@config/helmetOption';
 import { corsOptions } from '@config/cors';
-import { authenticate } from '@middleware/authMiddleware';
 
 import authRoutes from '@routes/auth/authRoutes';
+import userRoutes from '@routes/userRoutes';
 import certRoutes from '@routes/certRoutes';
 import badgeRoutes from '@routes/badgeRoutes';
 import profileRoutes from '@routes/profileRoutes';
@@ -19,6 +19,11 @@ import contractRoutes from '@routes/contractRoutes';
 dotenv.config();
 
 const app = express();
+const trust = process.env.TRUST_PROXY;
+
+if (trust) {
+    app.set('trust proxy', /^\d+$/.test(trust) ? Number(trust) : trust === 'true' ? true : trust);
+}
 
 // Logging
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
@@ -38,11 +43,12 @@ helmetMiddlewares.forEach(mw => app.use(mw));
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/certs', authenticate, certRoutes);
-app.use('/api/badges', authenticate, badgeRoutes);
-app.use('/api/profile', authenticate, profileRoutes);
-app.use('/api/projects', authenticate, projectRoutes);
-app.use('/api/contracts', authenticate, contractRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/certs', certRoutes);
+app.use('/api/badges', badgeRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/contracts', contractRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
