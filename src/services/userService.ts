@@ -23,8 +23,6 @@ export const addUserService = async (userData: User) => {
             introduction: userData.introduction,
             email: userData.email,
             password: hashedPassword,
-            createdAt: new Date(),
-            updatedAt: new Date(),
         }
     });
 }
@@ -35,7 +33,6 @@ export const updateUserService = async (id: number, data: Partial<User>) => {
         where: { id: id },
         data: {
             ...data,
-            updatedAt: new Date(),
         }
     })
 }
