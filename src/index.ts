@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import { env } from '@config/env/env';
 import { limiter } from '@config/rateLimit';
 import { errorHandler } from '@config/errorHandler';
 import { helmetMiddlewares } from '@config/helmetOption';
@@ -16,14 +17,14 @@ import projectRoutes from '@routes/projectRoutes';
 import contractRoutes from '@routes/contractRoutes';
 
 const app = express();
-const trust = process.env.TRUST_PROXY;
+const trust = env.TRUST_PROXY;
 
 if (trust) {
     app.set('trust proxy', /^\d+$/.test(trust) ? Number(trust) : trust === 'true' ? true : trust);
 }
 
 // Logging
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Body parser
 app.use(express.json({ limit: '2mb' }));
@@ -56,7 +57,7 @@ app.use((req: Request, res: Response) => {
 app.use(errorHandler);
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    console.log(`Server running in ${env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });

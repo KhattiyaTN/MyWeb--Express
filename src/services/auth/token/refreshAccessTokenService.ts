@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { prisma } from '@config/prismaClient';
-import { generateTokenService } from '@tokenServices/geneteTokenService';
+import { generateTokenService } from '@services/auth/token/generateTokenService';
 
 export const refreshAccessTokenService = async (refreshToken: string) => {
     const tokenHash = crypto

@@ -1,9 +1,10 @@
 import type { CorsOptions } from 'cors';
+import { env } from '@config/env/env';
 
 const parseOrigins = (val?: string): string[] =>
     val ? val.split(',').map((s) => s.trim()).filter(Boolean) : ['http://localhost:5173'];
 
-export const allowedOrigins: string[] = parseOrigins(process.env.FRONTEND_URL);
+export const allowedOrigins: string[] = parseOrigins(env.FRONTEND_URL);
 
 export const corsOptions: CorsOptions = {
     origin: (origin, callback) => {

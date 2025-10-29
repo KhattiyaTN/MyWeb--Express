@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import { env } from '@config/env/env';
 import { prisma } from '@config/prismaClient';
 import type { User } from '@prisma/client';
 
@@ -7,7 +8,7 @@ const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
 export const generateTokenService = async (user: User, ipAddress?: string, userAgent?: string) => {
-    const secret = process.env.JWT_SECRET;
+    const secret = env.JWT_SECRET;
 
     if (!secret) {
         throw new Error('Server configuration error: JWT_SECRET is not defined');

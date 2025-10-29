@@ -1,11 +1,12 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from 'jsonwebtoken';
+import { env } from "@config/env/env";
 import type { JwtPayload } from '../types/jwt_type';
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization || '';
     const [ schema, token ] = authHeader.split(' ');
-    const secret = process.env.JWT_SECRET;
+    const secret = env.JWT_SECRET;
 
     if (!authHeader || schema !== 'Bearer' || !token) {
         return res.status(401).json({ message: 'Unauthorized' });

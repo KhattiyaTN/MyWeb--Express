@@ -1,6 +1,7 @@
 import { prisma } from '@config/prismaClient';
+import { env } from '@config/env/env';
 import { comparePassword } from '@utils/comparePassword';
-import { generateTokenService } from '@tokenServices/geneteTokenService';
+import { generateTokenService } from '@services/auth/token/generateTokenService';
 
 // Login
 export const loginService = async (email: string, password: string, ip: string, userAgent: string) => {
@@ -16,7 +17,7 @@ export const loginService = async (email: string, password: string, ip: string, 
         throw new Error('Invalid email or password');
     }
 
-    const secret = process.env.JWT_SECRET!;
+    const secret = env.JWT_SECRET!;
     
     if (!secret) {
         throw new Error('Server misconfigured: JWT_SECRET is missing');

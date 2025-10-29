@@ -1,18 +1,23 @@
+import { env } from '@config/env/env';
 import { cloudinary } from '@config/upload/cloudinary';
 import { resizeImage } from '@utils/upload/imageUtils';
 import type { UploadApiOptions, UploadApiResponse } from 'cloudinary';
 
-const cloudinaryFolder = process.env.CLOUDINARY_FOLDER;
+const cloudinaryFolder = env.CLOUDINARY_FOLDER;
 
 export const uploadBufferToCloudinary = async (
     buffer: Buffer, 
     subFolder?: string, 
     options: UploadApiOptions = {}
 ) => {
-    return new Promise<UploadApiResponse>(async (resolve, reject) => {
-        
-        const resizeImg = await resizeImage(buffer, 800);
+    const resizeImg = await resizeImage(buffer, 800);
 
+    if (!cloudinary.config().cloud_name) {
+        throw new Error('Cloudinary is not configured. Please set CLOUDINARY_* envs.');
+    }
+
+    return new Promise<UploadApiResponse>((resolve, reject) => {
+        
         const stream = cloudinary.uploader.upload_stream(
             { 
                 folder: subFolder ? `${cloudinaryFolder}/${subFolder}` : cloudinaryFolder,
