@@ -14,16 +14,15 @@ export const getContractService = async (userId: number) => {
 
 // POST create contract service
 export const createContractService = async (contract: Contract,  files: Express.Multer.File[]) => {
-    let finalImageUrl = '';
-    let finalPublicId = '';
+    let finalImageUrl: string | undefined;
+    let finalPublicId: string | undefined;
 
-    if (files.length > 0) {
-        const uploadResults = await Promise.all(
-            files.map(file => uploadBufferToCloudinary(file.buffer, 'contracts'))
-        );
-        const uploaded = uploadResults[0];
-        finalImageUrl = uploaded?.secure_url ?? '';
-        finalPublicId = uploaded?.public_id ?? '';
+    const file = files?.[0];
+
+    if (file?.buffer) {
+        const uploadResult = await uploadBufferToCloudinary(file.buffer, 'contracts');
+        finalImageUrl = uploadResult?.secure_url ?? '';
+        finalPublicId = uploadResult?.public_id ?? '';
     }
     
     return await prisma.contract.create({
@@ -35,12 +34,8 @@ export const createContractService = async (contract: Contract,  files: Express.
                     {
                         url: finalImageUrl,
                         publicId: finalPublicId,
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
                     }
                 } : undefined,
-            createdAt: new Date(),
-            updatedAt: new Date(),
         },
         include: { image: true }
     });
@@ -57,21 +52,20 @@ export const updateContractService = async (id: number, data: Partial<Contract>,
         throw new Error('Contract not found');
     }
 
-    let finalImageUrl = '';
-    let finalPublicId = '';
+    let finalImageUrl: string | undefined;
+    let finalPublicId: string | undefined;
 
-    if (files.length > 0) {
-        const uploadResults = await Promise.all(files.map(
-            file => uploadBufferToCloudinary(file.buffer, 'contracts'))
-        );
-        const uploaded = uploadResults[0];
-        finalImageUrl = uploaded?.secure_url ?? '';
-        finalPublicId = uploaded?.public_id ?? '';
+    const file = files?.[0];
+
+    if (file?.buffer) {
+        const uploadResult = await uploadBufferToCloudinary(file.buffer, 'contracts');
+        finalImageUrl = uploadResult?.secure_url ?? '';
+        finalPublicId = uploadResult?.public_id ?? '';
 
         if (finalPublicId && existingContract?.image?.publicId && existingContract.image.publicId !== finalPublicId) {
             await deleteCloudinaryByPublicId(existingContract.image.publicId);
         }
-    } else if (imageUrl) {
+    } else if (imageUrl?.trim()) {
         finalImageUrl = imageUrl.trim();
     }
 
@@ -85,17 +79,13 @@ export const updateContractService = async (id: number, data: Partial<Contract>,
                         create: {
                             url: finalImageUrl,
                             publicId: finalPublicId,
-                            createdAt: new Date(),
-                            updatedAt: new Date(),
                         },
                         update: {
                             url: finalImageUrl,
                             publicId: finalPublicId,
-                            updatedAt: new Date(),
                         }
                     }
                 } : undefined,
-            updatedAt: new Date(),
         },
         include: { image: true },
     })
