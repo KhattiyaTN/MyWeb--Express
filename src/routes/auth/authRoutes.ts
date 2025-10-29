@@ -10,22 +10,29 @@ import { loginSchema, registerSchema, logoutSchema, refreshSchema } from '@schem
 
 const router = Router();
 
+// Register
 router.post(
     '/register', 
     validateMiddleware(registerSchema), 
     registerUser
 );
+
+// Login
 router.post(
     '/login', 
     loginLimiter, 
     validateMiddleware(loginSchema), 
     loginUser
 );
+
+// Logout
 router.post(
     '/logout', 
     validateMiddleware(logoutSchema), 
     logoutUser
 );
+
+// Refresh Token
 router.post(
     '/refresh', 
     refreshLimiter, 
