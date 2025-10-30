@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import express from 'express';
+import compression from 'compression';
 import userRoutes from '@routes/userRoutes';
 import certRoutes from '@routes/certRoutes';
 import badgeRoutes from '@routes/badgeRoutes';
@@ -18,7 +19,7 @@ import { errorHandler } from '@config/errorHandler';
 import { applyTrustProxy } from '@config/trustProxy';
 import { registerShutdown } from '@config/shutdown';
 import { helmetMiddlewares } from '@middleware/helmetMiddleware';
-
+import { compressionMiddleware } from '@middleware/compressionMiddleware';
 
 const app = express();
 const trust = env.TRUST_PROXY;
@@ -41,6 +42,8 @@ app.use(limiter);
 
 // Security headers
 helmetMiddlewares.forEach(mw => app.use(mw));
+
+app.use(compressionMiddleware);
 
 // CORS
 app.use(cors(corsOptions));

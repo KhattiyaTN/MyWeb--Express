@@ -5,6 +5,7 @@
     "@prisma/client": "^6.18.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.8.0",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "express-rate-limit": "^8",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/bun": "latest",
+    "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
