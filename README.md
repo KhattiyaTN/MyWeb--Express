@@ -47,6 +47,7 @@ bunx prisma migrate dev --name init
 bun run dev
 
 # Or
+
 bun run src/index.ts
 ```
 
@@ -98,8 +99,31 @@ src/
     ...
   controllers/
   services/
+  tests/
+    common/         # unit tests
+    integration/    # integration tests
   types/
 ```
+## Testing
+  Run tests
+  ```bash
+  bun test
+  bun test --watch
+  bun test --coverage
+  ```
+
+  Integration tests with DB
+  ```bash
+  export NODE_ENV=test
+  export DATABASE_URL="mysql://user:pass@localhost:3307/my_personal_web_test"
+  bunx prisma migrate deploy
+  bun test src/tests/integration
+  ```
+
+## Testing Notes
+- put unit tests in src/tests/common and integration at src/tests/integration
+- don't commit .env.test (use .env.test.example instead)
+- if rate limit have test config please change to NODE_ENV === 'test' in createApp
 
 ## API Endpoints (overview)
 - Auth
