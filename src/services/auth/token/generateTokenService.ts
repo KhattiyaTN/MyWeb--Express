@@ -2,10 +2,8 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { env } from '@config/env/env';
 import { prisma } from '@config/prismaClient';
+import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY_DAYS } from '@config/auth/tokenExp';
 import type { User } from '@prisma/client';
-
-const ACCESS_TOKEN_EXPIRY = '15m';
-const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
 export const generateTokenService = async (user: User, ipAddress?: string, userAgent?: string) => {
     const secret = env.JWT_SECRET;
@@ -16,6 +14,7 @@ export const generateTokenService = async (user: User, ipAddress?: string, userA
     
     const accessToken = jwt.sign(
         {
+            sub: String(user.id),
             id: user.id,
             email: user.email,
         },
@@ -27,7 +26,6 @@ export const generateTokenService = async (user: User, ipAddress?: string, userA
 
     const refreshToken = crypto.randomBytes(40).toString('hex');
     const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-
     const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
 
     await prisma.refreshToken.create({
@@ -40,5 +38,5 @@ export const generateTokenService = async (user: User, ipAddress?: string, userA
         }
     });
 
-    return { accessToken, refreshToken, tokenHash };
+    return { accessToken, refreshToken };
 }

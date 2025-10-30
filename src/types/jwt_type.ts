@@ -1,8 +1,9 @@
 import type { JwtPayload as LibJwtPayload } from 'jsonwebtoken';
 
 export interface JwtPayload extends LibJwtPayload {
-    id: number;
-    email: string;
+    sub?: string;
+    id?: number;
+    email?: string;
 }
 
 export interface RefreshTokenPayload {
