@@ -1,34 +1,40 @@
 import type { Request, Response, NextFunction } from 'express';
 import express from 'express';
-import cors from 'cors';
-import morgan from 'morgan';
-import { env } from '@config/env/env';
-import { limiter } from '@config/rateLimit';
-import { errorHandler } from '@config/errorHandler';
-import { helmetMiddlewares } from '@config/helmetOption';
-import { corsOptions } from '@config/cors';
-
-import authRoutes from '@routes/auth/authRoutes';
 import userRoutes from '@routes/userRoutes';
 import certRoutes from '@routes/certRoutes';
 import badgeRoutes from '@routes/badgeRoutes';
 import profileRoutes from '@routes/profileRoutes';
 import projectRoutes from '@routes/projectRoutes';
 import contractRoutes from '@routes/contractRoutes';
+import authRoutes from '@routes/auth/authRoutes';
+import systemRoutes from '@routes/performance/systemRoutes';
+
+import cors from 'cors';
+import { env } from '@config/env/env';
+import { logger } from '@config/log/logger';
+import { limiter } from '@config/rateLimit';
+import { corsOptions } from '@config/cors';
+import { errorHandler } from '@config/errorHandler';
+import { applyTrustProxy } from '@config/trustProxy';
+import { registerShutdown } from '@config/shutdown';
+import { helmetMiddlewares } from '@config/helmetOption';
+
 
 const app = express();
 const trust = env.TRUST_PROXY;
 
-if (trust) {
-    app.set('trust proxy', /^\d+$/.test(trust) ? Number(trust) : trust === 'true' ? true : trust);
-}
+// Trust proxy
+applyTrustProxy(app, trust);
 
 // Logging
-app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+app.use(logger);
 
 // Body parser
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Health checks
+app.use(systemRoutes);
 
 // Rate limiting
 app.use(limiter);
@@ -57,7 +63,10 @@ app.use((req: Request, res: Response) => {
 app.use(errorHandler);
 
 // Start server
-const PORT = env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running in ${env.NODE_ENV || 'development'} mode on port ${PORT}`);
+const server = app.listen(env.PORT, () => {
+    console.log(`Server running in ${env.NODE_ENV || 'development'} mode on port ${env.PORT}`);
 });
+
+
+// Graceful shutdown
+registerShutdown(server);
