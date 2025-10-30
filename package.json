@@ -27,15 +27,19 @@
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.5.2",
+    "@types/supertest": "^6.0.3",
     "nodemon": "^3.1.10",
     "prisma": "^6.18.0",
+    "supertest": "^7.1.4",
     "typescript": "^5.9.3"
   },
   "private": true,
   "scripts": {
     "dev": "nodemon --watch src --ext ts,tsx,json --exec \"bun run src/index.ts\"",
     "start": "NODE_ENV=production bun run src/index.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
   },
   "type": "module"
 }
