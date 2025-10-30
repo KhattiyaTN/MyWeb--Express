@@ -1,5 +1,5 @@
 import { prisma } from '@config/prismaClient';
-import { hashPassword } from '@utils/hashedPassword';
+import { hashPassword } from '@utils/hashedPasswordUtil';
 import type { User } from "@prisma/client";
 
 // Register

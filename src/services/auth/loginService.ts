@@ -1,6 +1,6 @@
 import { prisma } from '@config/prismaClient';
 import { env } from '@config/env/env';
-import { comparePassword } from '@utils/comparePassword';
+import { comparePassword } from '@utils/comparePasswordUtil';
 import { generateTokenService } from '@services/auth/token/generateTokenService';
 
 // Login

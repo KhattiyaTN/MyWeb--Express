@@ -1,6 +1,6 @@
 import { env } from '@config/env/env';
 import { cloudinary } from '@config/upload/cloudinary';
-import { resizeImage } from '@utils/upload/imageUtils';
+import { resizeImage } from '@utils/upload/imageUtil';
 import type { UploadApiOptions, UploadApiResponse } from 'cloudinary';
 
 const cloudinaryFolder = env.CLOUDINARY_FOLDER;
