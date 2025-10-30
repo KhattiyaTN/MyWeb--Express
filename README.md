@@ -168,4 +168,8 @@ bunx prisma studio
   use Bun don't call dotenv.config();
 
 ## License
-Private project.
+This project is licensed under a **Custom View-Only / Non-Commercial License**.  
+You may view and learn from the code, but **you may not use, modify, or distribute it** 
+for commercial purposes without permission.
+
+© 2025 Khattiya Thongnak
