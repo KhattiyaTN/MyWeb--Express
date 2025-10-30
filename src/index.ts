@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
 import express from 'express';
-import compression from 'compression';
 import userRoutes from '@routes/userRoutes';
 import certRoutes from '@routes/certRoutes';
 import badgeRoutes from '@routes/badgeRoutes';
