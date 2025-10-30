@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 import express from 'express';
 import userRoutes from '@routes/userRoutes';
 import certRoutes from '@routes/certRoutes';
@@ -66,7 +66,6 @@ app.use(errorHandler);
 const server = app.listen(env.PORT, () => {
     console.log(`Server running in ${env.NODE_ENV || 'development'} mode on port ${env.PORT}`);
 });
-
 
 // Graceful shutdown
 registerShutdown(server);
