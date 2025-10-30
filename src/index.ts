@@ -17,7 +17,7 @@ import { corsOptions } from '@config/cors';
 import { errorHandler } from '@config/errorHandler';
 import { applyTrustProxy } from '@config/trustProxy';
 import { registerShutdown } from '@config/shutdown';
-import { helmetMiddlewares } from '@config/helmetOption';
+import { helmetMiddlewares } from '@middleware/helmetMiddleware';
 
 
 const app = express();
@@ -39,11 +39,11 @@ app.use(systemRoutes);
 // Rate limiting
 app.use(limiter);
 
-// CORS
-app.use(cors(corsOptions));
-
 // Security headers
 helmetMiddlewares.forEach(mw => app.use(mw));
+
+// CORS
+app.use(cors(corsOptions));
 
 // Routes
 app.use('/api/auth', authRoutes);
