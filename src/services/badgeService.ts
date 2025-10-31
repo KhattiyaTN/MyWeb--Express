@@ -2,6 +2,7 @@ import { prisma } from '@config/prismaClient';
 import type { Badge } from '@prisma/client';
 import { uploadBufferToCloudinary } from '@services/upload/uploadService';
 import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
+import { AppError } from '@utils/appErrorUtil';
 
 // GET badges by user ID
 export const getAllBadgesService = async (userId: number) => {
@@ -53,7 +54,7 @@ export const updateBadgeService = async (badgeId: number, data: Partial<Badge>, 
     });
 
     if (!existingBadge) {
-        throw new Error('Badge not found');
+        throw new AppError(404, 'Badge not found');
     }
 
     let finalImageUrl: string | undefined;
@@ -103,7 +104,7 @@ export const deleteBadgeService = async (badgeId: number) => {
     })
 
     if (!existingBadge) {
-        throw new Error('Badge not found');
+        throw new AppError(404,'Badge not found');
     }
 
     if (existingBadge?.image?.publicId) {

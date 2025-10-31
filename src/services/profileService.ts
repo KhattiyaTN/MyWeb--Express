@@ -3,6 +3,7 @@ import type { Profile } from '@prisma/client';
 import { uploadBufferToCloudinary } from '@services/upload/uploadService';
 import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
 import { upload } from '@middleware/uploadMiddleware';
+import { AppError } from '@utils/appErrorUtil';
 
 // GET profile by user ID
 export const getProfileService = async (userId: number) => {
@@ -49,7 +50,7 @@ export const updateProfileService = async (userId: number, data: Partial<Profile
     });
 
     if (!existingProfile) {
-        throw new Error('Profile not found');
+        throw new AppError(404, 'Profile not found');
     }
 
     let finalImageUrl: string | undefined;
@@ -99,7 +100,7 @@ export const deleteProfileService = async (profileId: number) => {
     });
 
     if (!existingProfile) {
-        throw new Error('Profile not found');
+        throw new AppError(404, 'Profile not found');
     }
 
     if (existingProfile?.image?.publicId) {

@@ -2,6 +2,7 @@ import { prisma } from '@config/prismaClient';
 import type { Project } from '@prisma/client';
 import { uploadBufferToCloudinary } from '@services/upload/uploadService';
 import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
+import { AppError } from '@utils/appErrorUtil';
 
 // GET All project by ID
 export const getProjectsService = async (userId: number) => {
@@ -37,7 +38,7 @@ export const createProjectService = async (projectData: Project, files: Express.
 
         if (successfulUploads.length === 0) {
             console.log(`Failed to upload any images: ${failedUploads.join(', ')}`);
-            throw new Error(`All image uploads failed: ${failedUploads.join(', ')}`);
+            throw new AppError(400, `All image uploads failed: ${failedUploads.join(', ')}`);
         }
 
         if (failedUploads.length > 0) {
@@ -76,15 +77,15 @@ export const updateProjectService = async (id: number, data: Partial<Project>, i
     });
 
     if (!existingProject) {
-        throw new Error('Project not found');
+        throw new AppError(404, 'Project not found');
     }
 
     if (imageFiles.length === 0 && !imageUrl) {
-        throw new Error('At least one image file is required');
+        throw new AppError(400, 'At least one image file is required');
     }
 
     if (imageFiles.length + existingProject.images.length > 10) {
-        throw new Error('Cannot upload more than 10 images');
+        throw new AppError(400, 'Cannot upload more than 10 images');
     }
 
     const uploadResults = await Promise.allSettled(
@@ -107,7 +108,7 @@ export const updateProjectService = async (id: number, data: Partial<Project>, i
 
     if (successfulUploads.length === 0) {
         console.log(`Failed to upload any images: ${failedUploads.join(', ')}`);
-        throw new Error(`All image uploads failed: ${failedUploads.join(', ')}`);
+        throw new AppError(400, `All image uploads failed: ${failedUploads.join(', ')}`);
     }
 
     if (failedUploads.length > 0) {
@@ -142,7 +143,7 @@ export const deleteProjectService = async (projectId: number) => {
     });
 
     if (!existingProject) {
-        throw new Error('Project not found');
+        throw new AppError(404, 'Project not found');
     }
 
     await Promise.all(existingProject.images?.map(async (img) => {

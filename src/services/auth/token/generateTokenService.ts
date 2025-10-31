@@ -4,12 +4,13 @@ import { env } from '@config/env/env';
 import { prisma } from '@config/prismaClient';
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY_DAYS } from '@config/auth/tokenExp';
 import type { User } from '@prisma/client';
+import { AppError } from '@utils/appErrorUtil';
 
 export const generateTokenService = async (user: User, ipAddress?: string, userAgent?: string) => {
     const secret = env.JWT_SECRET;
 
     if (!secret) {
-        throw new Error('Server configuration error: JWT_SECRET is not defined');
+        throw new AppError(500, 'Server configuration error: JWT_SECRET is not defined');
     }
     
     const accessToken = jwt.sign(

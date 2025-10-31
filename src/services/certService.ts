@@ -2,6 +2,7 @@ import { prisma } from '@config/prismaClient';
 import type { Certification } from "@prisma/client"
 import { uploadBufferToCloudinary } from '@services/upload/uploadService';
 import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
+import { AppError } from '@utils/appErrorUtil';
 
 // GET certs by user ID
 export const getCertService = async (userId: number) => {
@@ -51,7 +52,7 @@ export const updateCertService = async (id: number, data: Partial<Certification>
     });
 
     if (!existingCert) {
-        throw new Error('Certificate not found');
+        throw new AppError(404, 'Certificate not found');
     }
 
     let finalImageUrl: string | undefined;
@@ -103,7 +104,7 @@ export const deleteCertService = async (certId: number) => {
     })
 
     if (!existingCert) {
-        throw new Error('Certificate not found');
+        throw new AppError(404, 'Certificate not found');
     }
 
     if (existingCert?.image?.publicId) {

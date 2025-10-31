@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '@config/env/env';
 import { prisma } from '@config/prismaClient';
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY_DAYS } from '@config/auth/tokenExp';
+import { AppError } from '@utils/appErrorUtil';
 
 export const refreshAccessTokenService = async (refreshToken: string) => {
     const tokenHash = crypto
@@ -15,7 +16,7 @@ export const refreshAccessTokenService = async (refreshToken: string) => {
     })
 
     if (!storedToken || storedToken.revokedAt || storedToken.expiresAt < new Date()) {
-        throw new Error('Invalid or expired refresh token');
+        throw new AppError(401, 'Invalid or expired refresh token');
     }
 
     const user = await prisma.user.findUnique({
@@ -23,7 +24,7 @@ export const refreshAccessTokenService = async (refreshToken: string) => {
     })
 
     if (!user) {
-        throw new Error('User not found');
+        throw new AppError(404, 'User not found');
     }
 
     const accessToken = jwt.sign(

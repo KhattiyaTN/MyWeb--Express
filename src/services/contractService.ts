@@ -2,6 +2,7 @@ import { prisma } from '@config/prismaClient';
 import type { Contract } from '@prisma/client'
 import { uploadBufferToCloudinary } from '@services/upload/uploadService';
 import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
+import { AppError } from '@utils/appErrorUtil';
 
 // GET contract by user ID
 export const getContractService = async (userId: number) => {
@@ -49,7 +50,7 @@ export const updateContractService = async (id: number, data: Partial<Contract>,
     });
 
     if (!existingContract) {
-        throw new Error('Contract not found');
+        throw new AppError(404, 'Contract not found');
     }
 
     let finalImageUrl: string | undefined;
@@ -99,7 +100,7 @@ export const deleteContractService = async (contractId: number) => {
     });
 
     if (!existingContract) {
-        throw new Error('Contract not found');
+        throw new AppError(404, 'Contract not found');
     }
 
     if (existingContract?.image?.publicId) {
