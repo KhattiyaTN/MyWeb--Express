@@ -46,7 +46,7 @@ bunx prisma migrate dev --name init
 ```bash
 bun run dev
 
-# Or
+# OR
 
 bun run src/index.ts
 ```
@@ -67,18 +67,20 @@ NODE_ENV=production TRUST_PROXY=1 bun run src/index.ts
 - CLOUDINARY_API_SECRET: Cloudinary API secret
 - CLOUDINARY_FOLDER: Base folder for uploads (default: my-personal-web)
 
-Tip: This project use config/env/env.ts for checking env by Zod and import env instead process.env
+Tip: This project uses src/config/env/env.ts (Zod) and imports env instead of using process.env directly.
 
 ## Project Structure (partial)
 ```
 src/
+  app.ts
   index.ts
   config/
     cors.ts
     errorHandler.ts
-    helmetOption.ts
     prismaClient.ts
     rateLimit.ts
+    log/
+      logger.ts
     env/
       env.ts
     upload/
@@ -87,13 +89,17 @@ src/
     authMiddleware.ts
     uploadMiddleware.ts
     validateMiddleware.ts
+    helmetMiddleware.ts
+    compressionMiddleware.ts
   routes/
-    auth/ authRoutes.ts
-    badgeRoutes.ts
-    certRoutes.ts
+    performance/
+      systemRoutes.ts
+    auth/
+      authRoutes.ts
     ...
   schemas/
-    auth/authSchema.ts
+    auth/
+      authSchema.ts
     badgeSchema.ts
     certSchema.ts
     ...
@@ -104,26 +110,40 @@ src/
     integration/    # integration tests
   types/
 ```
+
 ## Testing
-  Run tests
-  ```bash
-  bun test
-  bun test --watch
-  bun test --coverage
-  ```
+Quick run (unit + integration without DB)
+```bash
+bun run test
+bun run test:watch
+bun run test:cov
+```
 
-  Integration tests with DB
-  ```bash
-  export NODE_ENV=test
-  export DATABASE_URL="mysql://user:pass@localhost:3307/my_personal_web_test"
-  bunx prisma migrate deploy
-  bun test src/tests/integration
-  ```
+Integration tests with real DB
+```bash
+# 1) Create test env file
+cp .env.test.example .env.test.local
 
-## Testing Notes
-- put unit tests in src/tests/common and integration at src/tests/integration
-- don't commit .env.test (use .env.test.example instead)
-- if rate limit have test config please change to NODE_ENV === 'test' in createApp
+# 2) Start a MySQL test instance (example: port 3308)
+docker run -d --name myweb-mysql-test \
+  -e MYSQL_ROOT_PASSWORD=secret \
+  -e MYSQL_DATABASE=my_personal_web_test \
+  -p 3308:3306 \
+  mysql:8
+
+# 3) Prepare schema and seed
+bun run test:prepare
+bun run test:seed
+
+# 4) Run tests
+bun run test
+```
+
+Notes
+- Unit tests: src/tests/common
+- Integration tests: src/tests/integration
+- Do not commit .env.test.local (use .env.test.example for sharing)
+- Rate limit/logger are disabled in NODE_ENV=test to keep tests deterministic
 
 ## API Endpoints (overview)
 - Auth
@@ -144,13 +164,13 @@ src/
 
 Optional:
 - Health checks: GET /healthz, /readyz
-- API Docs: Swagger UI at /api/docs 
+- API Docs: Swagger UI at /api/docs
 
 ## Development Notes
-- Trust proxy: set app.set('trust proxy', TRUST_PROXY) for req.ip/req.secure is correct when stay back Nginx/Cloudflare
-- Rate limit: use express-rate-limit v8 ipKeyGenerator for protect IPv6 bypass
-- Validation: use Zod + validateMiddleware, and z.infer for DTO in controller
-- Upload: call multer before validate for multipart/form-data
+- Trust proxy: set app.set('trust proxy', TRUST_PROXY) so req.ip/req.secure are correct behind Nginx/Cloudflare
+- Rate limit: use express-rate-limit v8 ipKeyGenerator to be IPv6-safe
+- Validation: use Zod + validateMiddleware and z.infer DTOs in controllers
+- Upload: call multer before validation for multipart/form-data
 
 ## Common Commands
 ```bash
@@ -158,19 +178,15 @@ Optional:
 bunx prisma generate
 bunx prisma migrate dev --name <name>
 bunx prisma studio
-
-## Troubleshooting
-- IPv6 rate limit error (ERR_ERL_KEY_GEN_IPV6):
-  use ipKeyGenerator in keyGenerator (detail src/config/rateLimit.ts)
-- JWT types missing:
-  bun add jsonwebtoken && bun add -d @types/jsonwebtoken
-- dotenv logs duplicated:
-  use Bun do not call dotenv.config();
 ```
 
+## Troubleshooting
+- IPv6 rate limit error (ERR_ERL_KEY_GEN_IPV6): use ipKeyGenerator (see src/config/rateLimit.ts)
+- JWT types missing: bun add jsonwebtoken && bun add -d @types/jsonwebtoken
+- With Bun you don’t need dotenv.config()
+
 ## License
-This project is licensed under a **Custom View-Only / Non-Commercial License**.  
-You may view and learn from the code, but **you may not use, modify, or distribute it** 
-for commercial purposes without permission.
+This project is licensed under a Custom View-Only / Non-Commercial License.  
+You may view and learn from the code, but you may not use, modify, or distribute it for commercial purposes without permission.
 
 © 2025 Khattiya Thongnak
