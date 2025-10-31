@@ -39,7 +39,7 @@ export function createApp() {
     
     // Rate limiting
     if (env.NODE_ENV !== 'test') {
-        app.use(limiter);
+        app.use('/api', limiter);
     }
     
     // Security headers
@@ -50,7 +50,9 @@ export function createApp() {
     
     // CORS
     app.use(cors(corsOptions));
-    app.options('*', cors(corsOptions));
+
+    // CORS Preflight
+    app.options(/.*/, cors(corsOptions));
     
     // Routes
     app.use('/api/auth', authRoutes);

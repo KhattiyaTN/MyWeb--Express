@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express';
 import { systemReady } from '@services/performance/systemService';
-import { time, timeStamp } from 'console';
 
 // Health check controller
 export const healthz = (_req: Request, res: Response) => {
