@@ -1,6 +1,6 @@
 import { env } from '@config/env/env';
 import { registerShutdown } from '@config/shutdown';
-import { createApp } from './app';
+import { createApp } from '@app';
 
 // Create Express app
 const app = createApp();

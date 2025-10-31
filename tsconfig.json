@@ -8,6 +8,7 @@
     "allowJs": true,
     "baseUrl": ".",
     "paths": {
+      "@app": ["src/app.ts"],
       "@config/*": ["src/config/*"],
       "@controllers/*": ["src/controllers/*"],
       "@services/*": ["src/services/*"],

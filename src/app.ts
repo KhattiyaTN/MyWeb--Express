@@ -38,7 +38,9 @@ export function createApp() {
     app.use(systemRoutes);
     
     // Rate limiting
-    app.use(limiter);
+    if (env.NODE_ENV !== 'test') {
+        app.use(limiter);
+    }
     
     // Security headers
     helmetMiddlewares.forEach(mw => app.use(mw));
