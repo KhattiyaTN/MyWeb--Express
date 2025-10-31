@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 import express from 'express';
 import cors from 'cors';
 
@@ -19,8 +19,6 @@ import profileRoutes from '@routes/profileRoutes';
 import projectRoutes from '@routes/projectRoutes';
 import contractRoutes from '@routes/contractRoutes';
 import systemRoutes from '@routes/performance/systemRoutes';
-
-import { AppError } from '@utils/appErrorUtil';
 
 export function createApp() {
     const app = express();
@@ -66,8 +64,8 @@ export function createApp() {
     app.use('/api/contracts', contractRoutes);
     
     // 404 handler
-    app.use((req: Request, res: Response, next: NextFunction) => {
-        next(new AppError(404, 'Route not found'))
+    app.use((_req: Request, res: Response) => {
+        res.status(404).json({ error: 'Route not found' });
     });
     
     // Centralized error handler

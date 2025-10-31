@@ -7,14 +7,14 @@ import jwt from 'jsonwebtoken';
 export const errorHandler = (err: unknown, _req: Request, res: Response, _next: NextFunction) => {
     // AppError
     if (err instanceof AppError) {
-        return res.status(err.statusCode).json({ message: err.message, code: err.code })
+        return res.status(err.statusCode).json({ error: err.message, code: err.code })
     }
 
     // Zod validation error
     if (err instanceof ZodError) {
         return res.status(400).json({
-            message: 'Validation Error',
-            errors: err.errors.map(e => ({
+            error: 'Validation Error',
+            details: err.errors.map(e => ({
                 path: e.path.join('.'),
                 message: e.message,
             })),
@@ -23,7 +23,7 @@ export const errorHandler = (err: unknown, _req: Request, res: Response, _next: 
 
     // Invalid JSON error
     if (err instanceof SyntaxError && 'status' in (err as any) && (err as any).status === 400 && 'body' in (err as any)) {
-        return res.status(400).json({ message: 'Invalid JSON payload' });
+        return res.status(400).json({ error: 'Invalid JSON payload' });
     };
 
     // Multer errors
@@ -33,21 +33,21 @@ export const errorHandler = (err: unknown, _req: Request, res: Response, _next: 
             LIMIT_FILE_COUNT: 'File limit reached',
             LIMIT_UNEXPECTED_FILE: 'Unexpected file field',
         };
-        return res.status(400).json({ message: map[err.code] || 'File upload error'  });
+        return res.status(400).json({ error: map[err.code] || 'File upload error'  });
     };
 
     // JWT errors
     if (err instanceof jwt.TokenExpiredError) {
-        return res.status(401).json({ message: 'Token expired', code: 'TOKEN_EXPIRED' });
+        return res.status(401).json({ error: 'Token expired', code: 'TOKEN_EXPIRED' });
     };
     if (err instanceof jwt.JsonWebTokenError) {
-        return res.status(401).json({ message: 'Invalid token', code: 'INVALID_TOKEN' });
+        return res.status(401).json({ error: 'Invalid token', code: 'INVALID_TOKEN' });
     };
 
     // Custom status error
     const maybeErr = err as { status?: number; message?: string };
     if (typeof maybeErr.status === 'number') {
-        return res.status(maybeErr.status).json({ message: maybeErr.message || 'Error' });
+        return res.status(maybeErr.status).json({ error: maybeErr.message || 'Error' });
     };
 
     // Fallback
@@ -56,5 +56,5 @@ export const errorHandler = (err: unknown, _req: Request, res: Response, _next: 
     };
 
     // Internal Server Error
-    return res.status(500).json({ message: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Internal Server Error' });
 }
