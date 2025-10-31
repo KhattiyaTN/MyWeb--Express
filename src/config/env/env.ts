@@ -23,6 +23,11 @@ const envSchema = z.object({
     JWT_SECRET: z
         .string()
         .min(32, 'JWT_SECRET must be at least 32 characters long'),
+    BCRYPT_COST: z
+        .number()
+        .int()
+        .min(10, 'BCRYPT_COST must be at least 10')
+        .max(12, 'BCRYPT_COST must be at most 12'),
     CLOUDINARY_CLOUD_NAME: z
         .string()
         .min(1, 'CLOUDINARY_CLOUD_NAME is required'),
