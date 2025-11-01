@@ -11,18 +11,15 @@ import { applyTrustProxy } from '@config/trustProxy';
 import { helmetMiddlewares } from '@middleware/helmetMiddleware';
 import { compressionMiddleware } from '@middleware/compressionMiddleware';
 
-import userRoutes from '@routes/userRoutes';
-import certRoutes from '@routes/certRoutes';
-import badgeRoutes from '@routes/badgeRoutes';
-import authRoutes from '@routes/auth/authRoutes';
-import profileRoutes from '@routes/profileRoutes';
-import projectRoutes from '@routes/projectRoutes';
-import contractRoutes from '@routes/contractRoutes';
-import systemRoutes from '@routes/performance/systemRoutes';
+import v1Routes from '@routes/v1/index';
+import systemRoutes from '@routes/v1/performance/systemRoutes';
 
 export function createApp() {
     const app = express();
     const trust = env.TRUST_PROXY;
+
+    // Hide Express signature
+    app.disable('x-powered-by');
     
     // Trust proxy
     applyTrustProxy(app, trust);
@@ -32,14 +29,20 @@ export function createApp() {
     
     // Body parser
     app.use(express.json({ limit: '2mb' }));
-    app.use(express.urlencoded({ extended: true }));
+    app.use(express.urlencoded({ extended: true, limit: '2mb' }));
     
     // Health checks
     app.use(systemRoutes);
+
+    // CORS
+    app.use(cors(corsOptions));
+
+    // CORS Preflight
+    app.options(/.*/, cors(corsOptions));
     
     // Rate limiting
     if (env.NODE_ENV !== 'test') {
-        app.use('/api', limiter);
+        app.use('/api/v1', limiter);
     }
     
     // Security headers
@@ -48,21 +51,9 @@ export function createApp() {
     // Compression
     app.use(compressionMiddleware);
     
-    // CORS
-    app.use(cors(corsOptions));
-
-    // CORS Preflight
-    app.options(/.*/, cors(corsOptions));
-    
     // Routes
-    app.use('/api/auth', authRoutes);
-    app.use('/api/users', userRoutes);
-    app.use('/api/certs', certRoutes);
-    app.use('/api/badges', badgeRoutes);
-    app.use('/api/profile', profileRoutes);
-    app.use('/api/projects', projectRoutes);
-    app.use('/api/contracts', contractRoutes);
-    
+    app.use('/api/v1', v1Routes);
+
     // 404 handler
     app.use((_req: Request, res: Response) => {
         res.status(404).json({ error: 'Route not found' });
