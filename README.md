@@ -97,7 +97,7 @@ src/
         authRoutes.ts
       performance/
         systemRoutes.ts
-      main
+      main/
         badgeRoutes.ts
       index.ts
     v2/
