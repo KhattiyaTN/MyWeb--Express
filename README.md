@@ -44,7 +44,7 @@ bunx prisma migrate dev --name init
 
 4) Run in development
 ```bash
-bun run dev
+bun dev
 
 # OR
 
@@ -92,11 +92,17 @@ src/
     helmetMiddleware.ts
     compressionMiddleware.ts
   routes/
-    performance/
-      systemRoutes.ts
-    auth/
-      authRoutes.ts
-    ...
+    v1/
+      auth/
+        authRoutes.ts
+      performance/
+        systemRoutes.ts
+      main
+        badgeRoutes.ts
+      index.ts
+    v2/
+      index.ts
+    index.ts
   schemas/
     auth/
       authSchema.ts
@@ -114,9 +120,9 @@ src/
 ## Testing
 Quick run (unit + integration without DB)
 ```bash
-bun run test
-bun run test:watch
-bun run test:cov
+bun test
+bun test:watch
+bun test:cov
 ```
 
 Integration tests with real DB
@@ -132,11 +138,11 @@ docker run -d --name myweb-mysql-test \
   mysql:8
 
 # 3) Prepare schema and seed
-bun run test:prepare
-bun run test:seed
+bun test:prepare
+bun test:seed
 
 # 4) Run tests
-bun run test
+bun test
 ```
 
 Notes
