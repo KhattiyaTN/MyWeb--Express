@@ -9,8 +9,10 @@ export const limiter = rateLimit({
     max: 100,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS',
+    keyGenerator: (req) => safeIpKey(req),
     handler: (_req, res) => {
-        res.status(429).json({ message: 'Too many requests, please try again after 15 minutes' });
+        res.status(429).json({ error: 'Too many requests, please try again after 15 minutes' });
     },
 })
 
@@ -21,13 +23,14 @@ export const loginLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     skipSuccessfulRequests: true,
+    skip: (req) => req.method === 'OPTIONS',
     keyGenerator: (req, _res) => {
         const ip = safeIpKey(req);
         const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
         return `${ip}-${email}`;
     },
     handler: (_req, res) => {
-        res.status(429).json({ message: 'Too many login attempts, please try again after 10 minutes' });
+        res.status(429).json({ error: 'Too many login attempts, please try again after 10 minutes' });
     },
 })
 
@@ -37,8 +40,9 @@ export const refreshLimiter = rateLimit({
     max: 30,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS',
     keyGenerator: (req) => safeIpKey(req),
     handler: (_req, res) => {
-        res.status(429).json({ message: 'Too many token refresh attempts, please try again after 5 minutes' });
+        res.status(429).json({ error: 'Too many token refresh attempts, please try again after 5 minutes' });
     },
 })
