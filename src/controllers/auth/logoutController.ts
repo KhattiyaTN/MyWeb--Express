@@ -11,7 +11,7 @@ export const logoutUser = async (req: Request, res: Response, next: NextFunction
 
         await logoutService(refreshToken);
 
-        return res.status(204).send();
+        return res.status(200).json({ message: 'Successfully logged out' });
     } catch (error) {
         next(error);
     }
