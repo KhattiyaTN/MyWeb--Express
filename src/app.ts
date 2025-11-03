@@ -35,10 +35,7 @@ export function createApp() {
     app.use(systemRoutes);
 
     // CORS
-    app.use(cors(corsOptions));
-
-    // CORS Preflight
-    app.options(/.*/, cors(corsOptions));
+    app.use('/api/v1', cors(corsOptions));
     
     // Rate limiting
     if (env.NODE_ENV !== 'test') {
