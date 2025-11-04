@@ -5,7 +5,11 @@ import { prisma } from '@config/prismaClient';
 import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY_DAYS } from '@config/auth/tokenExp';
 import { AppError } from '@utils/appErrorUtil';
 
-export const refreshAccessTokenService = async (refreshToken: string) => {
+export const refreshAccessTokenService = async ( 
+    refreshToken: string,
+    ipAddress: string = 'unknown',
+    userAgent: string = 'unknown',
+) => {
     const tokenHash = crypto
         .createHash('sha256')
         .update(refreshToken)
@@ -17,6 +21,22 @@ export const refreshAccessTokenService = async (refreshToken: string) => {
 
     if (!storedToken || storedToken.revokedAt || storedToken.expiresAt < new Date()) {
         throw new AppError(401, 'Invalid or expired refresh token');
+    }
+
+    const ipMismatch = storedToken.ipAddress && storedToken.ipAddress !== ipAddress;
+    const agentMismatch = storedToken.userAgent && storedToken.userAgent !== userAgent;
+
+    if (ipMismatch || agentMismatch) {
+        await prisma.refreshToken.updateMany({
+            where: { 
+                userId: storedToken.userId, 
+                revokedAt: null 
+            },
+            data: { 
+                revokedAt: new Date() 
+            },
+        });
+        throw new AppError(401, 'Suspicious refresh attempt detected');
     }
 
     const user = await prisma.user.findUnique({
@@ -49,8 +69,8 @@ export const refreshAccessTokenService = async (refreshToken: string) => {
                 userId: user.id,
                 tokenHash: newHash,
                 expiresAt,
-                ipAddress: storedToken.ipAddress ?? undefined,
-                userAgent: storedToken.userAgent ?? undefined,
+                ipAddress,
+                userAgent,
             }
         })
 
