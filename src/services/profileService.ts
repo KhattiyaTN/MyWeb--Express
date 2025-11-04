@@ -2,7 +2,6 @@ import { prisma } from '@config/prismaClient';
 import type { Profile } from '@prisma/client';
 import { uploadBufferToCloudinary } from '@services/upload/uploadService';
 import { deleteCloudinaryByPublicId } from '@services/upload/deleteService';
-import { upload } from '@middleware/uploadMiddleware';
 import { AppError } from '@utils/appErrorUtil';
 
 // GET profile by user ID

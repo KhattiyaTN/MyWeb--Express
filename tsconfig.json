@@ -11,6 +11,7 @@
       "@app": ["src/app.ts"],
       "@config/*": ["src/config/*"],
       "@controllers/*": ["src/controllers/*"],
+      "@jobs/*": ["src/jobs/*"],
       "@services/*": ["src/services/*"],
       "@awsServices/*": ["src/services/upload/aws/*"],
       "@cloudinaryServices/*": ["src/services/upload/cloudinary/*"],
