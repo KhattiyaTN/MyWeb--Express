@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { AppError } from '@utils/appErrorUtil';
-import { logger } from '@config/log/pinoLogger';
+import { logger } from '@config/log/createLogger';
 import { ZodError } from 'zod';
 import { MulterError } from 'multer';
 import jwt from 'jsonwebtoken';

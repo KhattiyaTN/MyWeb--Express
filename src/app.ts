@@ -7,16 +7,18 @@ import { limiter } from '@config/rateLimit';
 import { corsOptions } from '@config/cors';
 import { errorHandler } from '@config/errorHandler';
 import { applyTrustProxy } from '@config/trustProxy';
+
+import { httpLogger } from '@middleware/httpLogger';
 import { helmetMiddlewares } from '@middleware/helmetMiddleware';
 import { compressionMiddleware } from '@middleware/compressionMiddleware';
 
 import v1Routes from '@routes/v1/index';
 import systemRoutes from '@routes/v1/performance/systemRoutes';
-import { httpLogger } from '@config/log/pinoLogger';
 
 export function createApp() {
     const app = express();
     const trust = env.TRUST_PROXY;
+    const enableOps = env.NODE_ENV !== 'test';
 
     // Hide Express signature
     app.disable('x-powered-by');
@@ -29,9 +31,7 @@ export function createApp() {
     app.use(express.urlencoded({ extended: true, limit: '2mb' }));
     
     // Pino Logger
-    if (env.NODE_ENV !== 'test') {
-        app.use(httpLogger);
-    }
+    if (enableOps) app.use(httpLogger);
     
     // Health checks
     app.use(systemRoutes);
@@ -40,9 +40,7 @@ export function createApp() {
     app.use('/api/v1', cors(corsOptions));
     
     // Rate limiting
-    if (env.NODE_ENV !== 'test') {
-        app.use('/api/v1', limiter);
-    }
+    if (enableOps) app.use('/api/v1', limiter);
     
     // Security headers
     helmetMiddlewares.forEach(mw => app.use(mw));
