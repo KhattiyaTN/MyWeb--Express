@@ -3,7 +3,6 @@ import express from 'express';
 import cors from 'cors';
 
 import { env } from '@config/env/env';
-import { logger } from '@config/log/logger';
 import { limiter } from '@config/rateLimit';
 import { corsOptions } from '@config/cors';
 import { errorHandler } from '@config/errorHandler';
@@ -13,6 +12,7 @@ import { compressionMiddleware } from '@middleware/compressionMiddleware';
 
 import v1Routes from '@routes/v1/index';
 import systemRoutes from '@routes/v1/performance/systemRoutes';
+import { httpLogger } from '@config/log/pinoLogger';
 
 export function createApp() {
     const app = express();
@@ -23,13 +23,15 @@ export function createApp() {
     
     // Trust proxy
     applyTrustProxy(app, trust);
-    
-    // Logging
-    app.use(logger);
-    
+
     // Body parser
     app.use(express.json({ limit: '2mb' }));
     app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+    
+    // Pino Logger
+    if (env.NODE_ENV !== 'test') {
+        app.use(httpLogger);
+    }
     
     // Health checks
     app.use(systemRoutes);

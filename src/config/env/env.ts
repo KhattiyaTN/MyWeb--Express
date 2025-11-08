@@ -17,6 +17,8 @@ const envSchema = z.object({
         .string()
         .url()
         .optional(),
+    LOG_LEVEL: z
+        .string(),
     DATABASE_URL: z
         .string()
         .min(1, 'DATABASE_URL is required'),
